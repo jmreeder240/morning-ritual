@@ -148,37 +148,44 @@ function rBrain(b,n,t){
 async function subBrain(){
   const val=document.getElementById('bin').value.trim();
   if(!val){next();return;}
+  // Split by newlines or periods into individual tasks
+  const lines=val.split(/\n|\. /).map(l=>l.trim()).filter(l=>l.length>3);
+  if(!lines.length){next();return;}
   const btn=document.getElementById('bbtn');
-  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Processing...';
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Adding to Todoist...';
   const out=document.getElementById('bout');
-  out.innerHTML='<div class="ld"><div class="spin"></div>Sorting your thoughts...</div>';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:600,
-        messages:[{role:'user',content:`Sort this brain dump. For each item decide: TASK-REBUILT, TASK-PERSONAL, TASK-RE (real estate), IDEA, or NOISE. Return ONLY JSON: {"items":[{"content":"task text","type":"TASK-REBUILT|TASK-PERSONAL|TASK-RE|IDEA|NOISE"}],"summary":"what you did in one sentence"}. Brain dump: ${val}`}]
-      })
-    });
-    const d=await res.json();
-    const txt=(d.content||[]).filter(x=>x.type==='text').map(x=>x.text).join('');
-    let parsed;
-    try{parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch(e){parsed=null;}
-    if(parsed&&parsed.items){
-      const tasks=parsed.items.filter(i=>i.type.startsWith('TASK'));
-      const pid={['TASK-REBUILT']:PR.rebuilt,['TASK-PERSONAL']:PR.personal,['TASK-RE']:PR.re};
-      if(tasks.length)await Promise.all(tasks.map(i=>addTask(i.content,'',pid[i.type]||PR.rebuilt,4,null)));
-      out.innerHTML=`<div style="font-size:14px;color:var(--t2);line-height:1.6;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)">${parsed.summary||'Done.'}</div>
-      <div class="brow"><button class="btn btnp" onclick="next()">Got it — next →</button></div>`;
-    }else{
-      out.innerHTML='<div class="err">Couldn\'t parse — continuing.</div>';
-      setTimeout(next,1500);
-    }
-  }catch(e){
-    out.innerHTML='<div class="err">Error: '+e.message+'</div><div class="brow"><button class="btn btnp" onclick="next()">Skip →</button></div>';
+  // Show project selector for each item
+  out.innerHTML=`<div style="font-size:13px;color:var(--t2);margin-bottom:1rem;font-weight:300">Route each item to the right project, then tap Done.</div>
+  ${lines.map((l,i)=>`<div style="margin-bottom:12px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+    <div style="font-size:14px;margin-bottom:8px">${l}</div>
+    <div class="chips">
+      <button class="chip${''}" id="chip-${i}-r" onclick="selectProject(${i},'rebuilt')">Rebuilt</button>
+      <button class="chip" id="chip-${i}-p" onclick="selectProject(${i},'personal')">Personal</button>
+      <button class="chip" id="chip-${i}-re" onclick="selectProject(${i},'re')">Real Estate</button>
+      <button class="chip del" id="chip-${i}-d" onclick="selectProject(${i},'skip')">Skip</button>
+    </div>
+  </div>`).join('')}
+  <div class="brow"><button class="btn btnp" onclick="saveBrainTasks(${JSON.stringify(lines).replace(/'/g,"&#39;")})">Add to Todoist & continue →</button></div>`;
+  btn.style.display='none';
+}
+
+const brainSelections={};
+function selectProject(idx,proj){
+  brainSelections[idx]=proj;
+  ['r','p','re','d'].forEach(s=>{
+    const el=document.getElementById('chip-'+idx+'-'+s);
+    if(el)el.className='chip'+(s===proj.charAt(0)||proj===s?(' ok'):' ');
+  });
+}
+
+async function saveBrainTasks(lines){
+  const pid={rebuilt:PR.rebuilt,personal:PR.personal,re:PR.re};
+  const tasks=lines.map((l,i)=>({content:l,proj:brainSelections[i]||'rebuilt'}))
+    .filter(t=>t.proj!=='skip');
+  if(tasks.length){
+    try{await Promise.all(tasks.map(t=>addTask(t.content,'',pid[t.proj]||PR.rebuilt,4,null)));}catch(e){}
   }
+  next();
 }
 
 // INBOX
