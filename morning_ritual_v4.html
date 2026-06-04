@@ -160,70 +160,73 @@ function backBtn() {
 }
 
 // BRAIN
+var brainLines = [];
+
 function rBrain(b, n, t) {
+  brainLines = [];
   b.innerHTML = '<div class="card">' + backBtn() +
     '<div class="snum">Step ' + n + ' of ' + t + '</div>' +
     '<div class="stitle">Brain dump</div>' +
-    '<div class="sdesc">What\'s in your head? Dump everything - tasks, worries, ideas. Route each item to the right project.</div>' +
-    '<textarea id="bin" placeholder="Everything on my mind right now..."></textarea>' +
-    '<div class="brow"><button class="btn btnp" id="bbtn" onclick="subBrain()">Route to projects</button>' +
-    '<button class="btn" onclick="next()">Nothing on my mind</button></div>' +
-    '<div id="bout" style="margin-top:1rem"></div></div>';
+    '<div class="sdesc">Type a thought and hit Enter. Keep going until your head is clear.</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:1rem">' +
+    '<input class="txtin" id="bin" type="text" placeholder="Type a thought and hit Enter..." style="margin-bottom:0;flex:1" />' +
+    '<button class="btn btnp" onclick="addBrainItem()" style="flex-shrink:0">Add</button></div>' +
+    '<div id="brain-list" style="margin-bottom:1rem"></div>' +
+    '<div class="brow">' +
+    '<button class="btn btnp" id="bbtn" onclick="subBrain()">Done — send to inbox</button>' +
+    '<button class="btn" onclick="next()">Nothing on my mind</button></div></div>';
+  setTimeout(function() {
+    var input = document.getElementById('bin');
+    if (input) {
+      input.focus();
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); addBrainItem(); }
+      });
+    }
+  }, 100);
 }
 
-var brainLines = [];
-var brainSels = {};
+function addBrainItem() {
+  var input = document.getElementById('bin');
+  if (!input) return;
+  var val = input.value.trim();
+  if (!val) return;
+  brainLines.push(val);
+  input.value = '';
+  input.focus();
+  renderBrainList();
+}
 
-function subBrain() {
-  var val = document.getElementById('bin').value.trim();
-  if (!val) { next(); return; }
-  var btn = document.getElementById('bbtn');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-  brainLines = val.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 2; });
-  brainSels = {};
-  if (!brainLines.length) { next(); return; }
-  var out = document.getElementById('bout');
-  var rows = brainLines.map(function(l, i) {
-    return '<div style="margin-bottom:12px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">' +
-      '<div style="font-size:14px;margin-bottom:8px;word-break:break-word">' + l + '</div>' +
-      '<div class="chips">' +
-      '<button class="chip" id="bs-' + i + '-r" onclick="selBrain(' + i + ',\'rebuilt\')">Rebuilt</button>' +
-      '<button class="chip" id="bs-' + i + '-p" onclick="selBrain(' + i + ',\'personal\')">Personal</button>' +
-      '<button class="chip" id="bs-' + i + '-re" onclick="selBrain(' + i + ',\'re\')">Real Estate</button>' +
-      '<button class="chip del" id="bs-' + i + '-s" onclick="selBrain(' + i + ',\'skip\')">Skip</button>' +
-      '</div></div>';
+function removeBrainItem(idx) {
+  brainLines.splice(idx, 1);
+  renderBrainList();
+}
+
+function renderBrainList() {
+  var el = document.getElementById('brain-list');
+  if (!el) return;
+  if (!brainLines.length) { el.innerHTML = ''; return; }
+  el.innerHTML = brainLines.map(function(l, i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:6px">' +
+      '<div style="flex:1;font-size:14px;color:var(--text)">' + l + '</div>' +
+      '<button onclick="removeBrainItem(' + i + ')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:0;line-height:1">&times;</button>' +
+      '</div>';
   }).join('');
-  out.innerHTML = '<div style="font-size:13px;color:var(--t2);margin-bottom:1rem;font-weight:300">Route each item then tap Done.</div>' +
-    rows +
-    '<div class="brow"><button class="btn btnp" onclick="saveBrain()">Add to Todoist & continue</button></div>';
 }
 
-function selBrain(idx, proj) {
-  brainSels[idx] = proj;
-  var keys = ['r', 'p', 're', 's'];
-  keys.forEach(function(k) {
-    var el = document.getElementById('bs-' + idx + '-' + k);
-    if (el) el.className = 'chip';
-  });
-  var map = {rebuilt:'r', personal:'p', re:'re', skip:'s'};
-  var active = document.getElementById('bs-' + idx + '-' + map[proj]);
-  if (active) active.className = 'chip ok';
-}
-
-async function saveBrain() {
-  var pid = {rebuilt: PR.rebuilt, personal: PR.personal, re: PR.re};
-  var tasks = brainLines.map(function(l, i) {
-    return {content: l, proj: brainSels[i] || 'rebuilt'};
-  }).filter(function(t) { return t.proj !== 'skip'; });
-  if (tasks.length) {
-    try {
-      await Promise.all(tasks.map(function(t) {
-        return addTask(t.content, '', pid[t.proj] || PR.rebuilt, 4, null);
-      }));
-    } catch(e) {}
+async function subBrain() {
+  if (!brainLines.length) { next(); return; }
+  var btn = document.getElementById('bbtn');
+  btn.disabled = true; btn.textContent = 'Adding to inbox...';
+  try {
+    for (var i = 0; i < brainLines.length; i++) {
+      await addTask(brainLines[i], 'From brain dump', PR.inbox, 4, null);
+    }
+    brainLines = [];
+    next();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Done - send to inbox';
   }
-  next();
 }
 
 // INBOX
