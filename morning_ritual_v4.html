@@ -113,7 +113,7 @@ async function tDel(path) {
 }
 
 async function getInbox() { return tGet('/tasks?project_id=' + PR.inbox); }
-async function getLabeled(lbl) { return tGet('/tasks?filter=' + encodeURIComponent('@' + lbl)); }
+async function getLabeled(lbl) { return tGet('/tasks?label=' + encodeURIComponent(lbl)); }
 async function getToday() {
   const tasks = await tGet('/tasks?filter=' + encodeURIComponent('due before: tomorrow & !#Daily'));
   return tasks.filter(function(t) {
