@@ -1,0 +1,17 @@
+{
+  "name": "morning-ritual-proxy",
+  "version": "1.0.0",
+  "description": "Todoist proxy for morning ritual app",
+  "main": "server.js",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  }
+}
