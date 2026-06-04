@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start My Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F4EF;--card:#fff;--text:#1C1917;--t2:#78716C;--t3:#A8A29E;--border:#E7E5E4;--acc:#D97706;--accs:#FEF3C7;--red:#DC2626;--reds:#FEE2E2;--green:#16A34A;--greens:#DCFCE7;--r:14px;--sh:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:520px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.logo{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
+.dtag{font-size:12px;color:var(--t3);font-weight:300;margin-bottom:1.5rem}
+.htop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.pips{display:flex;gap:4px;margin-bottom:6px}
+.pip{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .4s}
+.pip.done{background:var(--text)}.pip.active{background:var(--acc)}
+.slbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2rem}
+.card{background:var(--card);border-radius:var(--r);padding:1.75rem;box-shadow:var(--sh);border:.5px solid var(--border);margin-bottom:1rem;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.snum{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stitle{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px;letter-spacing:-.3px}
+.sdesc{font-size:14px;color:var(--t2);line-height:1.65;margin-bottom:1.5rem;font-weight:300}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;white-space:nowrap}
+.btn:hover{background:var(--bg)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btnp{background:var(--text);color:#fff;border-color:transparent}.btnp:hover{opacity:.85;background:var(--text)}
+.btna{background:var(--acc);color:#fff;border-color:transparent}.btna:hover{opacity:.9;background:var(--acc)}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.25rem}
+textarea,.txtin{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;line-height:1.6;transition:border .2s;margin-bottom:1rem}
+textarea{min-height:90px;resize:vertical}
+textarea:focus,.txtin:focus{outline:none;border-color:var(--acc)}
+.ti{display:flex;align-items:flex-start;gap:10px;padding:11px 14px 11px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all .15s;position:relative;margin-bottom:6px;border-left:3px solid var(--border)}
+.ti.p1{border-left-color:var(--red)}.ti.p2{border-left-color:var(--acc)}.ti.p3{border-left-color:var(--green)}
+.ti:hover{border-color:#C4B5A0}.ti.sel{border-color:var(--text);background:#fff}
+.tc{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:500;color:var(--t3);margin-top:1px;transition:all .2s}
+.ti.sel .tc{background:var(--text);border-color:var(--text);color:#fff}
+.row-item{padding:11px 14px 11px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:6px;border-left:3px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.row-item.p1{border-left-color:var(--red)}.row-item.p2{border-left-color:var(--acc)}.row-item.p3{border-left-color:var(--green)}
+.row-content{flex:1;min-width:0}
+.row-name{font-size:14px;line-height:1.4;word-break:break-word}
+.row-sub{font-size:12px;color:var(--t3);margin-top:2px;font-weight:300}
+.row-actions{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;margin-top:4px}
+.ibi{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
+.iname{font-size:14px;margin-bottom:8px;word-break:break-word;overflow-wrap:anywhere}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--t2);font-family:'DM Sans',sans-serif;transition:all .15s}
+.chip:hover{background:var(--text);color:#fff;border-color:var(--text)}
+.chip.red:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.chip.ok{background:var(--greens);color:var(--green);border-color:transparent;cursor:default}
+.gi{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:6px}
+.ga{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:500}
+.gt{font-size:14px;line-height:1.45;font-weight:300}
+.sb{background:var(--bg);border-radius:10px;padding:1.25rem;margin-bottom:1rem;border:1px solid var(--border)}
+.slb{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.b3r{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.b3r:last-child{border-bottom:none}
+.b3n{font-family:'DM Serif Display',serif;font-size:18px;color:var(--t3);width:22px;flex-shrink:0}
+.ld{display:flex;align-items:center;gap:10px;color:var(--t2);font-size:14px;font-weight:300;padding:1rem 0}
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{font-size:14px;color:var(--t3);padding:.5rem 0;margin-bottom:1rem;font-weight:300}
+.cbadge{display:inline-block;background:var(--accs);color:var(--acc);font-size:12px;padding:2px 10px;border-radius:20px;margin-bottom:1rem;font-weight:500}
+.redbadge{display:inline-block;background:var(--reds);color:var(--red);font-size:12px;padding:2px 10px;border-radius:20px;margin-bottom:1rem;font-weight:500}
+.wt{font-family:'DM Serif Display',serif;font-size:16px;line-height:1.5;font-style:italic}
+.err{font-size:13px;color:var(--red);padding:.5rem 0}
+.backbtn{background:none;border:none;color:var(--t3);font-size:13px;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;margin-bottom:1.25rem;display:inline-flex;align-items:center;gap:4px}
+.backbtn:hover{color:var(--text)}
+.rec-badge{font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.75rem}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="htop"><div class="logo">Start My Day</div></div>
+  <div class="dtag" id="dtag"></div>
+  <div class="pips" id="pips"></div>
+  <div class="slbl" id="slbl"></div>
+  <div id="body"></div>
+</div>
+<script>
+const PROXY = 'https://morning-ritual-production.up.railway.app/todoist';
+const PR = {rebuilt:'6gXj8W3Cmh5jfpX8',personal:'6ghgHCjF6vv6mMM9',re:'6gXj8VxFCvr7vqcM',someday:'6gXj8Vx23x479X5j',daily:'6gj8HWmhQ49gXjQC',inbox:'6fw8r3f3225prXvg'};
+const GOALS = [
+  {area:'Rebuilt', text:'Run 4 cohorts + convert 3-5 cold traffic clients by Aug 19'},
+  {area:'Health & Fitness', text:'Train weights 3x/week for 12 consecutive weeks - zero injuries by Aug 19'},
+  {area:'Family & Relationships', text:'Attend AA meetings 3x/week for 90 days by Aug 19'},
+  {area:'Real Estate', text:'Find next listing opportunity'},
+  {area:'Home & Life Admin', text:'Keep life admin stable - bills current, nothing falling through the cracks'}
+];
+const STEPS = ['Brain','Inbox','Clear Decks','@thisweek','@waiting','Plan & Goals','Intention','Done'];
+let cur = 0, big3 = [], intention = '', ibDone = new Set(), brainLines = [], todayTasks = [];
+
+function iso() { return new Date().toISOString().slice(0,10); }
+function nextWeekISO() { var d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,10); }
+function dstr() { return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }
+function pLabel(p) { return p===1?'P1 🔴':p===2?'P2 🟡':p===3?'P3 🟢':'P4 ⚪'; }
+function sortByPriority(tasks) { return tasks.slice().sort(function(a,b){return (a.priority||4)-(b.priority||4);}); }
+
+async function tGet(path) {
+  var r = await fetch(PROXY + path);
+  if (!r.ok) throw new Error(r.status);
+  var d = await r.json();
+  return Array.isArray(d) ? d : (d.results || d);
+}
+async function tPost(path, data) {
+  var r = await fetch(PROXY + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if (!r.ok) throw new Error(r.status);
+  return r.status === 204 ? null : r.json();
+}
+async function tDel(path) { await fetch(PROXY + path, {method:'DELETE'}); }
+
+async function getInbox() { return tGet('/tasks?project_id=' + PR.inbox); }
+async function getLabeled(lbl) { return tGet('/tasks?label=' + encodeURIComponent(lbl)); }
+async function getOverdue() {
+  var today = iso();
+  var tasks = await tGet('/tasks?filter=' + encodeURIComponent('overdue'));
+  return sortByPriority(tasks.filter(function(t){
+    return !t.content.toLowerCase().includes('intention') && !t.content.toLowerCase().includes('review 90');
+  }));
+}
+async function getToday() {
+  var tasks = await tGet('/tasks?filter=' + encodeURIComponent('due: today'));
+  return sortByPriority(tasks.filter(function(t){
+    return !t.content.toLowerCase().includes('intention') && !t.content.toLowerCase().includes('review 90');
+  }));
+}
+async function moveTask(id, pid) { return tPost('/tasks/'+id, {project_id:pid}); }
+async function delTask(id) { return tDel('/tasks/'+id); }
+async function setDue(id, date) { return tPost('/tasks/'+id, {due_date:date}); }
+async function clearDue(id) { return tPost('/tasks/'+id, {due_string:'no date'}); }
+async function addTask(content, desc, pid, prio, due) {
+  var b = {content:content, project_id:pid, priority:prio||4};
+  if (desc) b.description = desc;
+  if (due) b.due_date = due;
+  return tPost('/tasks', b);
+}
+
+function updHdr() {
+  document.getElementById('pips').innerHTML = STEPS.map(function(s,i){
+    var c = i<cur?'done':i===cur?'active':'';
+    return '<div class="pip '+c+'"></div>';
+  }).join('');
+  document.getElementById('slbl').textContent = STEPS[cur];
+}
+function next() { if(cur<STEPS.length-1){cur++;render();} }
+function back() { if(cur>0){cur--;render();} }
+function backBtn() { return cur>0?'<button class="backbtn" onclick="back()">← Back</button>':''; }
+
+function render() {
+  updHdr();
+  var b = document.getElementById('body');
+  var s = STEPS[cur], n = cur+1, t = STEPS.length-1;
+  if (s==='Brain') rBrain(b,n,t);
+  else if(s==='Inbox') rInbox(b,n,t);
+  else if(s==='Clear Decks') rClear(b,n,t);
+  else if(s==='@thisweek') rWeek(b,n,t);
+  else if(s==='@waiting') rWait(b,n,t);
+  else if(s==='Plan & Goals') rPlan(b,n,t);
+  else if(s==='Intention') rInt(b,n,t);
+  else rDone(b);
+}
+
+// ── BRAIN ────────────────────────────────────────────────
+function rBrain(b,n,t) {
+  brainLines = [];
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">Brain dump</div>'+
+    '<div class="sdesc">Type a thought and hit Enter. Keep going until your head is clear. Everything goes to your inbox to process next.</div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:1rem">'+
+    '<input class="txtin" id="bin" type="text" placeholder="Type a thought and hit Enter..." style="margin-bottom:0;flex:1" />'+
+    '<button class="btn btnp" onclick="addBrainItem()" style="flex-shrink:0">Add</button></div>'+
+    '<div id="brain-list" style="margin-bottom:1rem"></div>'+
+    '<div class="brow">'+
+    '<button class="btn btnp" id="bbtn" onclick="subBrain()">Done — send to inbox</button>'+
+    '<button class="btn" onclick="next()">Nothing on my mind</button></div></div>';
+  setTimeout(function(){
+    var input = document.getElementById('bin');
+    if(input){ input.focus(); input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addBrainItem();}}); }
+  },100);
+}
+function addBrainItem() {
+  var input = document.getElementById('bin');
+  if(!input) return;
+  var val = input.value.trim();
+  if(!val) return;
+  brainLines.push(val);
+  input.value = ''; input.focus();
+  var el = document.getElementById('brain-list');
+  if(!el) return;
+  el.innerHTML = brainLines.map(function(l,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:6px">'+
+      '<div style="flex:1;font-size:14px;color:var(--text)">'+l+'</div>'+
+      '<button onclick="removeBrain('+i+')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:0;line-height:1">&times;</button></div>';
+  }).join('');
+}
+function removeBrain(idx) { brainLines.splice(idx,1); document.getElementById('brain-list').innerHTML=brainLines.map(function(l,i){return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:6px"><div style="flex:1;font-size:14px;color:var(--text)">'+l+'</div><button onclick="removeBrain('+i+')" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:0;line-height:1">&times;</button></div>'; }).join(''); }
+async function subBrain() {
+  if(!brainLines.length){next();return;}
+  var btn=document.getElementById('bbtn');
+  btn.disabled=true;btn.textContent='Adding to inbox...';
+  try{
+    for(var i=0;i<brainLines.length;i++){await addTask(brainLines[i],'From brain dump',PR.inbox,4,null);}
+    brainLines=[];next();
+  }catch(e){btn.disabled=false;btn.textContent='Done — send to inbox';}
+}
+
+// ── INBOX ────────────────────────────────────────────────
+function rInbox(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">Process inbox</div>'+
+    '<div class="sdesc">Every item gets a decision. Inbox ends at zero.</div>'+
+    '<div id="ibody"><div class="ld"><div class="spin"></div>Pulling inbox...</div></div></div>';
+  loadInbox();
+}
+async function loadInbox() {
+  try{var tasks=await getInbox();showInbox(tasks);}
+  catch(e){document.getElementById('ibody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip</button>';}
+}
+function showInbox(tasks) {
+  var el=document.getElementById('ibody');if(!el)return;
+  var rem=tasks.filter(function(t){return !ibDone.has(t.id);});
+  if(!tasks.length||!rem.length){
+    el.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Inbox is zero</div><button class="btn btnp" onclick="next()">Next</button>';
+    return;
+  }
+  var sorted=sortByPriority(rem);
+  el.innerHTML='<div class="cbadge">'+sorted.length+' item'+(sorted.length!==1?'s':'')+' to process</div>'+
+    sorted.map(function(t){
+      return '<div class="ibi" id="ib-'+t.id+'">'+
+        '<div class="iname">'+t.content+'</div>'+
+        '<div class="chips">'+
+        '<button class="chip" onclick="doInbox(\''+t.id+'\',\'rebuilt\')">→ Rebuilt</button>'+
+        '<button class="chip" onclick="doInbox(\''+t.id+'\',\'personal\')">→ Personal</button>'+
+        '<button class="chip" onclick="doInbox(\''+t.id+'\',\'re\')">→ Real Estate</button>'+
+        '<button class="chip" onclick="doInbox(\''+t.id+'\',\'someday\')">→ Someday</button>'+
+        '<button class="chip red" onclick="doInbox(\''+t.id+'\',\'delete\')">Delete</button>'+
+        '</div></div>';
+    }).join('')+
+    '<button class="btn" onclick="next()" style="margin-top:.5rem">Skip remaining</button>';
+}
+async function doInbox(id,action) {
+  var el=document.getElementById('ib-'+id);
+  if(el){el.style.opacity='.3';el.style.pointerEvents='none';}
+  ibDone.add(id);
+  try{if(action==='delete')await delTask(id);else await moveTask(id,PR[action]||PR.someday);}catch(e){}
+  if(el)el.remove();
+  var rem=document.querySelectorAll('[id^="ib-"]');
+  if(!rem.length){var body=document.getElementById('ibody');if(body)body.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Inbox is zero</div><button class="btn btnp" onclick="next()">Next</button>';}
+}
+
+// ── CLEAR DECKS ──────────────────────────────────────────
+function rClear(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">Clear the decks</div>'+
+    '<div class="sdesc">Overdue tasks from previous days. Every one needs a decision before you plan today.</div>'+
+    '<div id="cbody"><div class="ld"><div class="spin"></div>Pulling overdue tasks...</div></div></div>';
+  loadClear();
+}
+async function loadClear() {
+  try{var tasks=await getOverdue();showClear(tasks);}
+  catch(e){document.getElementById('cbody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip</button>';}
+}
+function showClear(tasks) {
+  var el=document.getElementById('cbody');if(!el)return;
+  var rem=tasks.filter(function(t){return !window.clearDone||!window.clearDone.has(t.id);});
+  if(!tasks.length||!rem.length){
+    el.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Decks are clear</div><button class="btn btnp" onclick="next()">Next</button>';
+    return;
+  }
+  window.clearDone = window.clearDone||new Set();
+  el.innerHTML='<div class="redbadge">'+rem.length+' overdue task'+(rem.length!==1?'s':'')+' need a decision</div>'+
+    rem.map(function(t){
+      return '<div class="row-item p'+(t.priority||4)+'" id="cd-'+t.id+'">'+
+        '<div class="row-content">'+
+        '<div class="row-name">'+t.content+'</div>'+
+        '<div class="row-sub">'+(t.due?'Due '+t.due.date:'')+' · '+pLabel(t.priority||4)+'</div>'+
+        '<div class="row-actions">'+
+        '<button class="chip" onclick="doClr(\''+t.id+'\',\'today\')">→ Today</button>'+
+        '<button class="chip" onclick="doClr(\''+t.id+'\',\'week\')">→ This week</button>'+
+        '<button class="chip" onclick="doClr(\''+t.id+'\',\'someday\')">→ Someday</button>'+
+        '<button class="chip red" onclick="doClr(\''+t.id+'\',\'delete\')">Delete</button>'+
+        '</div></div></div>';
+    }).join('')+
+    '<button class="btn" onclick="next()" style="margin-top:.5rem">Skip remaining</button>';
+}
+async function doClr(id,action) {
+  var el=document.getElementById('cd-'+id);
+  if(el){el.style.opacity='.3';el.style.pointerEvents='none';}
+  window.clearDone=window.clearDone||new Set();
+  window.clearDone.add(id);
+  try{
+    if(action==='today')await setDue(id,iso());
+    else if(action==='week')await setDue(id,nextWeekISO());
+    else if(action==='someday'){await clearDue(id);await moveTask(id,PR.someday);}
+    else if(action==='delete')await delTask(id);
+  }catch(e){}
+  if(el)el.remove();
+  var rem=document.querySelectorAll('[id^="cd-"]');
+  if(!rem.length){var body=document.getElementById('cbody');if(body)body.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Decks are clear</div><button class="btn btnp" onclick="next()">Next</button>';}
+}
+
+// ── @THISWEEK ────────────────────────────────────────────
+function rWeek(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">@thisweek</div>'+
+    '<div class="sdesc">Tasks committed to this week without a date yet. Move anything you want to tackle today.</div>'+
+    '<div id="wbody"><div class="ld"><div class="spin"></div>Pulling @thisweek...</div></div></div>';
+  loadWeek();
+}
+async function loadWeek() {
+  try{
+    var all=await getLabeled('thisweek');
+    var today=iso();
+    var tasks=sortByPriority(all.filter(function(t){return !t.due||t.due.date===today;}));
+    var el=document.getElementById('wbody');if(!el)return;
+    if(!tasks.length){
+      el.innerHTML='<div class="empty">No unscheduled @thisweek tasks.</div><button class="btn btnp" onclick="next()">Next</button>';
+      return;
+    }
+    el.innerHTML='<div class="cbadge">'+tasks.length+' task'+(tasks.length!==1?'s':'')+' need scheduling</div>'+
+      tasks.map(function(t){
+        return '<div class="row-item p'+(t.priority||4)+'" id="tw-'+t.id+'">'+
+          '<div class="row-content">'+
+          '<div class="row-name">'+t.content+'</div>'+
+          '<div class="row-sub">'+pLabel(t.priority||4)+'</div>'+
+          '<div class="row-actions">'+
+          '<button class="chip" id="twb-'+t.id+'" onclick="twAct(\''+t.id+'\',\'today\')">→ Today</button>'+
+          '<button class="chip" onclick="twAct(\''+t.id+'\',\'nextweek\')">→ Next week</button>'+
+          '<button class="chip red" onclick="twAct(\''+t.id+'\',\'delete\')">Delete</button>'+
+          '</div></div></div>';
+      }).join('')+
+      '<div class="brow"><button class="btn btnp" onclick="next()">Reviewed — next</button></div>';
+  }catch(e){document.getElementById('wbody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip</button>';}
+}
+async function twAct(id,action) {
+  var btns=document.querySelectorAll('#tw-'+id+' .chip');
+  btns.forEach(function(b){b.disabled=true;});
+  try{
+    if(action==='today')await setDue(id,iso());
+    else if(action==='nextweek')await setDue(id,nextWeekISO());
+    else if(action==='delete')await delTask(id);
+  }catch(e){}
+  var el=document.getElementById('tw-'+id);
+  if(el){el.style.opacity='.4';}
+  var doneChip=document.getElementById('twb-'+id);
+  if(doneChip){doneChip.textContent='✓ Done';doneChip.className='chip ok';}
+}
+
+// ── @WAITING ─────────────────────────────────────────────
+function rWait(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">@waiting</div>'+
+    '<div class="sdesc">Things in someone else\'s court. Does anything need a follow-up nudge today?</div>'+
+    '<div id="wabody"><div class="ld"><div class="spin"></div>Pulling @waiting...</div></div></div>';
+  loadWait();
+}
+async function loadWait() {
+  try{
+    var tasks=await getLabeled('waiting');
+    var el=document.getElementById('wabody');if(!el)return;
+    if(!tasks.length){
+      el.innerHTML='<div class="empty">Nothing waiting on anyone.</div><button class="btn btnp" onclick="next()">Next</button>';
+      return;
+    }
+    var sorted=sortByPriority(tasks);
+    el.innerHTML=sorted.map(function(t){
+      return '<div class="row-item p'+(t.priority||4)+'" id="wa-'+t.id+'">'+
+        '<div class="row-content">'+
+        '<div class="row-name">'+t.content+'</div>'+
+        '<div class="row-sub">'+(t.due?'Since '+t.due.date:'No date')+' · '+pLabel(t.priority||4)+'</div>'+
+        '<div class="row-actions">'+
+        '<button class="chip" id="wab-'+t.id+'" onclick="waAct(\''+t.id+'\',\'today\')">Follow up today</button>'+
+        '<button class="chip red" onclick="waAct(\''+t.id+'\',\'delete\')">Delete</button>'+
+        '</div></div></div>';
+    }).join('')+
+    '<div class="brow"><button class="btn btnp" onclick="next()">Reviewed — next</button></div>';
+  }catch(e){document.getElementById('wabody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip</button>';}
+}
+async function waAct(id,action) {
+  var btn=document.getElementById('wab-'+id);
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    if(action==='today')await setDue(id,iso());
+    else if(action==='delete')await delTask(id);
+  }catch(e){}
+  if(btn){btn.textContent='✓ Done';btn.className='chip ok';}
+}
+
+// ── PLAN & GOALS ─────────────────────────────────────────
+function rPlan(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">Today\'s plan</div>'+
+    '<div class="sdesc">Everything scheduled for today. Clean it up, then check it against your goals.</div>'+
+    '<div id="planbody"><div class="ld"><div class="spin"></div>Loading today\'s tasks...</div></div></div>';
+  loadPlan();
+}
+async function loadPlan() {
+  try{
+    var tasks=await getToday();
+    todayTasks=tasks;
+    showPlan(tasks);
+  }catch(e){document.getElementById('planbody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip</button>';}
+}
+function showPlan(tasks) {
+  var el=document.getElementById('planbody');if(!el)return;
+  var rem=tasks.filter(function(t){return !window.planDone||!window.planDone.has(t.id);});
+  var goalRows=GOALS.map(function(g){
+    return '<div class="gi"><div class="ga">'+g.area+'</div><div class="gt">'+g.text+'</div></div>';
+  }).join('');
+  if(!rem.length){
+    el.innerHTML='<div class="empty" style="margin-bottom:1rem">No tasks scheduled for today.</div>'+
+      '<div style="margin-bottom:1.5rem">'+goalRows+'</div>'+
+      '<div class="brow"><button class="btn btna" onclick="next()">Set intention →</button></div>';
+    return;
+  }
+  window.planDone=window.planDone||new Set();
+  var taskRows=rem.map(function(t){
+    return '<div class="row-item p'+(t.priority||4)+'" id="pl-'+t.id+'">'+
+      '<div class="row-content">'+
+      '<div class="row-name">'+t.content+'</div>'+
+      '<div class="row-sub">'+pLabel(t.priority||4)+'</div>'+
+      '<div class="row-actions">'+
+      '<button class="chip" onclick="plAct(\''+t.id+'\',\'tomorrow\')">→ Tomorrow</button>'+
+      '<button class="chip" onclick="plAct(\''+t.id+'\',\'someday\')">→ Someday</button>'+
+      '<button class="chip red" onclick="plAct(\''+t.id+'\',\'delete\')">Delete</button>'+
+      '</div></div></div>';
+  }).join('');
+  el.innerHTML='<div class="rec-badge">'+rem.length+' tasks scheduled today</div>'+
+    taskRows+
+    '<div style="margin-top:1.5rem;margin-bottom:.5rem;font-size:13px;color:var(--t2);font-weight:300">Does this connect to your goals?</div>'+
+    '<div style="margin-bottom:1.5rem">'+goalRows+'</div>'+
+    '<div class="brow">'+
+    '<button class="btn btna" onclick="next()">Yes — set intention →</button>'+
+    '</div>';
+}
+async function plAct(id,action) {
+  var el=document.getElementById('pl-'+id);
+  if(el){el.style.opacity='.3';el.style.pointerEvents='none';}
+  window.planDone=window.planDone||new Set();
+  window.planDone.add(id);
+  try{
+    var tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+    var tomorrowISO=tomorrow.toISOString().slice(0,10);
+    if(action==='tomorrow')await setDue(id,tomorrowISO);
+    else if(action==='someday'){await clearDue(id);await moveTask(id,PR.someday);}
+    else if(action==='delete')await delTask(id);
+  }catch(e){}
+  if(el)el.remove();
+  // Reload remaining
+  var remaining=document.querySelectorAll('[id^="pl-"]');
+  if(!remaining.length){
+    var planb=document.getElementById('planbody');
+    if(planb){
+      var goalRows=GOALS.map(function(g){return '<div class="gi"><div class="ga">'+g.area+'</div><div class="gt">'+g.text+'</div></div>';}).join('');
+      planb.innerHTML='<div class="empty" style="margin-bottom:1rem">Today\'s list is clean.</div>'+
+        '<div style="margin-bottom:1.5rem">'+goalRows+'</div>'+
+        '<div class="brow"><button class="btn btna" onclick="next()">Set intention →</button></div>';
+    }
+  }
+}
+
+// ── INTENTION ────────────────────────────────────────────
+function rInt(b,n,t) {
+  b.innerHTML = '<div class="card">'+backBtn()+
+    '<div class="snum">Step '+n+' of '+t+'</div>'+
+    '<div class="stitle">Set your intention</div>'+
+    '<div class="sdesc">Today is a win if...</div>'+
+    '<input class="txtin" id="iin" type="text" placeholder="the delivery sequence is complete and ads are live..." />'+
+    '<div class="brow"><button class="btn btna" id="ibtn" onclick="subInt()">Lock it in 🔒</button></div>'+
+    '<div id="iout"></div></div>';
+  setTimeout(function(){var i=document.getElementById('iin');if(i)i.focus();},100);
+}
+async function subInt() {
+  var val=document.getElementById('iin').value.trim();
+  if(!val)return;
+  intention='Today is a win if '+val;
+  var btn=document.getElementById('ibtn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{await addTask('Today\'s intention',intention,PR.daily,1,iso());next();}
+  catch(e){document.getElementById('iout').innerHTML='<div class="err">Couldn\'t save.</div>';setTimeout(next,1500);}
+}
+
+// ── DONE ─────────────────────────────────────────────────
+function rDone(b) {
+  var intentHtml=intention?'<div class="sb"><div class="slb">Win condition</div><div class="wt">'+intention+'</div></div>':'';
+  var todayHtml='';
+  if(todayTasks.length){
+    var rows=todayTasks.map(function(t,i){
+      return '<div class="b3r"><span class="b3n">'+(i+1)+'</span><span style="font-size:14px;color:var(--text);line-height:1.4">'+t.content+'</span></div>';
+    }).join('');
+    todayHtml='<div class="sb"><div class="slb">Today\'s plan</div>'+rows+'</div>';
+  }
+  b.innerHTML='<div class="card" style="text-align:center;padding:2rem">'+
+    '<div style="font-size:48px;margin-bottom:1rem">🌅</div>'+
+    '<div class="stitle" style="margin-bottom:.5rem">You\'re set.</div>'+
+    '<div class="sdesc">Morning ritual complete. Go build.</div></div>'+
+    intentHtml+todayHtml+
+    '<button class="btn" onclick="reset()" style="margin-top:.5rem">↺ Start over</button>';
+}
+
+function reset() {
+  cur=0;big3=[];intention='';ibDone=new Set();brainLines=[];todayTasks=[];
+  window.clearDone=new Set();window.planDone=new Set();
+  render();
+}
+
+document.getElementById('dtag').textContent=dstr();
+render();
+</script>
+</body>
+</html>
