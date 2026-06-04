@@ -1,27 +1,37 @@
-const express = require('express');
-const cors = require('cors');
-const fetch = require('node-fetch');
+const https = require('https');
+const http = require('http');
+const url = require('url');
 
-const app = express();
 const PORT = process.env.PORT || 8080;
 const TOKEN = process.env.TODOIST_TOKEN;
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const server = http.createServer((req, res) => {
+  // CORS headers on every response
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-app.options('*', cors());
-app.use(express.json());
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
 
-app.all('/todoist/*', async (req, res) => {
-  const path = req.path.replace('/todoist', '');
-  const qs = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
-  const url = 'https://api.todoist.com/rest/v2' + path + qs;
+  // Health check
+  if (req.url === '/health') {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({status: 'ok', token: TOKEN ? 'set' : 'missing'}));
+    return;
+  }
 
-  try {
+  // Proxy Todoist requests
+  if (req.url.startsWith('/todoist/')) {
+    const todoistPath = req.url.replace('/todoist', '');
+    const parsedUrl = url.parse('https://api.todoist.com/rest/v2' + todoistPath);
+
     const options = {
+      hostname: 'api.todoist.com',
+      path: '/rest/v2' + todoistPath,
       method: req.method,
       headers: {
         'Authorization': 'Bearer ' + TOKEN,
@@ -29,22 +39,54 @@ app.all('/todoist/*', async (req, res) => {
       }
     };
 
-    if (req.method !== 'GET' && req.method !== 'DELETE') {
-      options.body = JSON.stringify(req.body);
-    }
+    console.log('Proxying:', req.method, options.path);
+    console.log('Token starts with:', TOKEN ? TOKEN.substring(0, 8) : 'MISSING');
 
-    const response = await fetch(url, options);
-    const status = response.status;
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      const proxyReq = https.request(options, (proxyRes) => {
+        let data = '';
+        proxyRes.on('data', chunk => { data += chunk; });
+        proxyRes.on('end', () => {
+          console.log('Todoist response status:', proxyRes.statusCode);
+          console.log('Todoist response:', data.substring(0, 200));
+          
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          
+          if (proxyRes.statusCode === 204) {
+            res.writeHead(204);
+            res.end();
+            return;
+          }
 
-    if (status === 204) { res.status(204).send(); return; }
+          try {
+            const json = JSON.parse(data);
+            res.writeHead(proxyRes.statusCode, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify(json));
+          } catch(e) {
+            res.writeHead(500, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({error: 'Parse error', raw: data.substring(0, 500)}));
+          }
+        });
+      });
 
-    const data = await response.json();
-    res.status(status).json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      proxyReq.on('error', (e) => {
+        console.error('Proxy error:', e);
+        res.writeHead(500, {'Content-Type': 'application/json'});
+        res.end(JSON.stringify({error: e.message}));
+      });
+
+      if (body && req.method !== 'GET' && req.method !== 'DELETE') {
+        proxyReq.write(body);
+      }
+      proxyReq.end();
+    });
+    return;
   }
+
+  res.writeHead(404);
+  res.end('Not found');
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-app.listen(PORT, () => console.log('Proxy running on port ' + PORT));
+server.listen(PORT, () => console.log('Server running on port ' + PORT));
