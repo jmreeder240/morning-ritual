@@ -299,11 +299,17 @@ function rWeek(b, n, t) {
 
 async function loadWeek() {
   try {
-    var tasks = await getLabeled('thisweek');
+    var allTasks = await getLabeled('thisweek');
+    var today = iso();
+    // Only show tasks with no date OR overdue — already-dated future tasks are handled
+    var tasks = allTasks.filter(function(t) {
+      if (!t.due) return true;
+      return t.due.date <= today;
+    });
     var el = document.getElementById('wbody');
     if (!el) return;
     if (!tasks.length) {
-      el.innerHTML = '<div class="empty">No @thisweek tasks.</div><button class="btn btnp" onclick="next()">Next</button>';
+      el.innerHTML = '<div class="empty">All @thisweek tasks are already scheduled.</div><button class="btn btnp" onclick="next()">Next</button>';
       return;
     }
     var pl = {1:'P1 🔴', 2:'P2 🟡', 3:'P3 🟢', 4:'P4 ⚪'};
