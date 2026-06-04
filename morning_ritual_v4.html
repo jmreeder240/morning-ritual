@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start My Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F4EF;--card:#fff;--text:#1C1917;--t2:#78716C;--t3:#A8A29E;--border:#E7E5E4;--acc:#D97706;--accs:#FEF3C7;--red:#DC2626;--green:#16A34A;--greens:#DCFCE7;--r:14px;--sh:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:520px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.logo{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
+.dtag{font-size:12px;color:var(--t3);font-weight:300;margin-bottom:1.5rem}
+.htop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.pips{display:flex;gap:4px;margin-bottom:6px}
+.pip{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .4s}
+.pip.done{background:var(--text)}.pip.active{background:var(--acc)}
+.slbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2rem}
+.card{background:var(--card);border-radius:var(--r);padding:1.75rem;box-shadow:var(--sh);border:.5px solid var(--border);margin-bottom:1rem;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.snum{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stitle{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px;letter-spacing:-.3px}
+.sdesc{font-size:14px;color:var(--t2);line-height:1.65;margin-bottom:1.5rem;font-weight:300}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;white-space:nowrap}
+.btn:hover{background:var(--bg)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btnp{background:var(--text);color:#fff;border-color:transparent}.btnp:hover{opacity:.85;background:var(--text)}
+.btna{background:var(--acc);color:#fff;border-color:transparent}.btna:hover{opacity:.9;background:var(--acc)}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.25rem}
+textarea,.txtin{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;line-height:1.6;transition:border .2s;margin-bottom:1rem}
+textarea{min-height:90px;resize:vertical}
+textarea:focus,.txtin:focus{outline:none;border-color:var(--acc)}
+.ti{display:flex;align-items:flex-start;gap:10px;padding:11px 14px 11px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all .15s;position:relative;margin-bottom:6px;border-left:3px solid var(--border)}
+.ti.p1{border-left-color:var(--red)}.ti.p2{border-left-color:var(--acc)}.ti.p3{border-left-color:var(--green)}
+.ti:hover{border-color:#C4B5A0}.ti.sel{border-color:var(--text);background:#fff}
+.tc{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:500;color:var(--t3);margin-top:1px;transition:all .2s}
+.ti.sel .tc{background:var(--text);border-color:var(--text);color:#fff}
+.tn{font-size:14px;line-height:1.4;flex:1}
+.tsub{font-size:12px;color:var(--t3);margin-top:2px;font-weight:300}
+.ibi{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;transition:opacity .3s}
+.iname{font-size:14px;margin-bottom:8px}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--t2);font-family:'DM Sans',sans-serif;transition:all .15s}
+.chip:hover{background:var(--text);color:#fff;border-color:var(--text)}
+.chip.del:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.chip.ok{background:var(--greens);color:var(--green);border-color:transparent;cursor:default}
+.gi{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:6px}
+.ga{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:500}
+.gt{font-size:14px;line-height:1.45;font-weight:300}
+.sb{background:var(--bg);border-radius:10px;padding:1.25rem;margin-bottom:1rem;border:1px solid var(--border)}
+.slb{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.b3r{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.b3r:last-child{border-bottom:none}
+.b3n{font-family:'DM Serif Display',serif;font-size:18px;color:var(--t3);width:22px;flex-shrink:0}
+.ld{display:flex;align-items:center;gap:10px;color:var(--t2);font-size:14px;font-weight:300;padding:1rem 0}
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{font-size:14px;color:var(--t3);padding:.5rem 0;margin-bottom:1rem;font-weight:300}
+.cbadge{display:inline-block;background:var(--accs);color:var(--acc);font-size:12px;padding:2px 10px;border-radius:20px;margin-bottom:1rem;font-weight:500}
+.wt{font-family:'DM Serif Display',serif;font-size:16px;line-height:1.5;font-style:italic}
+.witem{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.twitem{padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-left:3px solid var(--border)}
+.twitem.p1{border-left-color:var(--red)}.twitem.p2{border-left-color:var(--acc)}
+.err{font-size:13px;color:var(--red);padding:.5rem 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="htop"><div class="logo">Start My Day</div><div></div></div>
+  <div class="dtag" id="dtag"></div>
+  <div class="pips" id="pips"></div>
+  <div class="slbl" id="slbl"></div>
+  <div id="body"></div>
+</div>
+<script>
+const TOKEN='7f3c0656d2affbcac553803ced436796ebb7717b';
+const API='https://api.todoist.com/rest/v2';
+const PR={rebuilt:'6gXj8W3Cmh5jfpX8',personal:'6ghgHCjF6vv6mMM9',re:'6gXj8VxFCvr7vqcM',someday:'6gXj8Vx23x479X5j',daily:'6gj8HWmhQ49gXjQC',inbox:'6fw8r3f3225prXvg'};
+const GOALS=[
+  {area:'Rebuilt',text:'Run 4 cohorts + convert 3–5 cold traffic clients by Aug 19'},
+  {area:'Health & Fitness',text:'Train weights 3x/week for 12 consecutive weeks — zero injuries by Aug 19'},
+  {area:'Family & Relationships',text:'Attend AA meetings 3x/week for 90 days by Aug 19'},
+  {area:'Real Estate',text:'Find next listing opportunity'},
+  {area:'Home & Life Admin',text:'Keep life admin stable — bills current, nothing falling through the cracks'}
+];
+const STEPS=['Brain','Inbox','This Week','Waiting','Big 3','Goals','Intention','Done'];
+let cur=0,big3=[],intention='',ibDone=new Set();
+
+function iso(){return new Date().toISOString().slice(0,10)}
+function dstr(){return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}
+
+async function tGet(p){const r=await fetch(API+p,{headers:{'Authorization':'Bearer '+TOKEN}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function tPost(p,d){const r=await fetch(API+p,{method:'POST',headers:{'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json()}
+async function tDel(p){await fetch(API+p,{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}})}
+
+async function getInbox(){return tGet('/tasks?project_id='+PR.inbox)}
+async function getLabeled(lbl){return tGet('/tasks?filter='+encodeURIComponent('@'+lbl))}
+async function getToday(){
+  const tasks=await tGet('/tasks?filter='+encodeURIComponent('due before: tomorrow & !#Daily'));
+  return tasks.filter(t=>!t.content.toLowerCase().includes('intention')&&!t.content.toLowerCase().includes('review 90'));
+}
+async function moveTask(id,pid){return tPost('/tasks/'+id,{project_id:pid})}
+async function delTask(id){return tDel('/tasks/'+id)}
+async function setDue(id,date){return tPost('/tasks/'+id,{due_date:date})}
+async function addTask(content,desc,pid,prio,due){
+  const b={content,project_id:pid,priority:prio||4};
+  if(desc)b.description=desc;if(due)b.due_date=due;
+  return tPost('/tasks',b);
+}
+
+function updHdr(){
+  document.getElementById('pips').innerHTML=STEPS.map((s,i)=>{
+    const c=i<cur?'done':i===cur?'active':'';
+    return '<div class="pip '+c+'"></div>';
+  }).join('');
+  document.getElementById('slbl').textContent=STEPS[cur];
+}
+function next(){if(cur<STEPS.length-1){cur++;render();}}
+function render(){
+  updHdr();
+  const b=document.getElementById('body');
+  const s=STEPS[cur],n=cur+1,t=STEPS.length-1;
+  if(s==='Brain')rBrain(b,n,t);
+  else if(s==='Inbox')rInbox(b,n,t);
+  else if(s==='This Week')rWeek(b,n,t);
+  else if(s==='Waiting')rWait(b,n,t);
+  else if(s==='Big 3')rBig3(b,n,t);
+  else if(s==='Goals')rGoals(b,n,t);
+  else if(s==='Intention')rInt(b,n,t);
+  else rDone(b);
+}
+
+// BRAIN
+function rBrain(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">Brain dump</div>
+  <div class="sdesc">What's in your head? Dump everything — tasks, worries, ideas. I'll sort it and add tasks to Todoist automatically.</div>
+  <textarea id="bin" placeholder="Everything on my mind right now..."></textarea>
+  <div class="brow">
+    <button class="btn btnp" id="bbtn" onclick="subBrain()">Process & add to Todoist</button>
+    <button class="btn" onclick="next()">Nothing on my mind</button>
+  </div>
+  <div id="bout" style="margin-top:1rem"></div>
+  </div>`;
+}
+async function subBrain(){
+  const val=document.getElementById('bin').value.trim();
+  if(!val){next();return;}
+  const btn=document.getElementById('bbtn');
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Processing...';
+  const out=document.getElementById('bout');
+  out.innerHTML='<div class="ld"><div class="spin"></div>Sorting your thoughts...</div>';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        messages:[{role:'user',content:`Sort this brain dump. For each item decide: TASK-REBUILT, TASK-PERSONAL, TASK-RE (real estate), IDEA, or NOISE. Return ONLY JSON: {"items":[{"content":"task text","type":"TASK-REBUILT|TASK-PERSONAL|TASK-RE|IDEA|NOISE"}],"summary":"what you did in one sentence"}. Brain dump: ${val}`}]
+      })
+    });
+    const d=await res.json();
+    const txt=(d.content||[]).filter(x=>x.type==='text').map(x=>x.text).join('');
+    let parsed;
+    try{parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch(e){parsed=null;}
+    if(parsed&&parsed.items){
+      const tasks=parsed.items.filter(i=>i.type.startsWith('TASK'));
+      const pid={['TASK-REBUILT']:PR.rebuilt,['TASK-PERSONAL']:PR.personal,['TASK-RE']:PR.re};
+      if(tasks.length)await Promise.all(tasks.map(i=>addTask(i.content,'',pid[i.type]||PR.rebuilt,4,null)));
+      out.innerHTML=`<div style="font-size:14px;color:var(--t2);line-height:1.6;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)">${parsed.summary||'Done.'}</div>
+      <div class="brow"><button class="btn btnp" onclick="next()">Got it — next →</button></div>`;
+    }else{
+      out.innerHTML='<div class="err">Couldn\'t parse — continuing.</div>';
+      setTimeout(next,1500);
+    }
+  }catch(e){
+    out.innerHTML='<div class="err">Error: '+e.message+'</div><div class="brow"><button class="btn btnp" onclick="next()">Skip →</button></div>';
+  }
+}
+
+// INBOX
+function rInbox(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">Process inbox</div>
+  <div class="sdesc">Every item gets a decision. Inbox ends at zero.</div>
+  <div id="ibody"><div class="ld"><div class="spin"></div>Pulling inbox...</div></div>
+  </div>`;
+  loadInbox();
+}
+async function loadInbox(){
+  try{const tasks=await getInbox();showInbox(tasks);}
+  catch(e){document.getElementById('ibody').innerHTML='<div class="err">Couldn\'t load inbox.</div><button class="btn btnp" onclick="next()">Skip →</button>';}
+}
+function showInbox(tasks){
+  const el=document.getElementById('ibody');if(!el)return;
+  const rem=tasks.filter(t=>!ibDone.has(t.id));
+  if(!tasks.length||!rem.length){
+    el.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Inbox is zero</div><button class="btn btnp" onclick="next()">Next →</button>';
+    return;
+  }
+  el.innerHTML=`<div class="cbadge">${rem.length} item${rem.length!==1?'s':''} to process</div>
+  ${rem.map(t=>`<div class="ibi" id="ib-${t.id}">
+    <div class="iname">${t.content}</div>
+    <div class="chips">
+      <button class="chip" onclick="doInbox('${t.id}','rebuilt')">→ Rebuilt</button>
+      <button class="chip" onclick="doInbox('${t.id}','personal')">→ Personal</button>
+      <button class="chip" onclick="doInbox('${t.id}','re')">→ Real Estate</button>
+      <button class="chip" onclick="doInbox('${t.id}','someday')">→ Someday</button>
+      <button class="chip del" onclick="doInbox('${t.id}','delete')">Delete</button>
+    </div>
+  </div>`).join('')}
+  <button class="btn" onclick="next()" style="margin-top:.5rem">Skip remaining →</button>`;
+}
+async function doInbox(id,action){
+  const el=document.getElementById('ib-'+id);
+  if(el){el.style.opacity='.3';el.style.pointerEvents='none';}
+  ibDone.add(id);
+  try{
+    if(action==='delete')await delTask(id);
+    else await moveTask(id,PR[action==='re'?'re':action]||PR.someday);
+  }catch(e){}
+  if(el)el.remove();
+  const rem=document.querySelectorAll('[id^="ib-"]');
+  if(!rem.length){
+    const body=document.getElementById('ibody');
+    if(body)body.innerHTML='<div style="font-size:20px;margin-bottom:.75rem">✅</div><div style="font-size:14px;color:var(--green);font-weight:500;margin-bottom:1.25rem">Inbox is zero</div><button class="btn btnp" onclick="next()">Next →</button>';
+  }
+}
+
+// THIS WEEK
+function rWeek(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">This week</div>
+  <div class="sdesc">Tasks you committed to this week. Move anything urgent to today.</div>
+  <div id="wbody"><div class="ld"><div class="spin"></div>Pulling @thisweek...</div></div>
+  </div>`;
+  loadWeek();
+}
+async function loadWeek(){
+  try{
+    const tasks=await getLabeled('thisweek');
+    const el=document.getElementById('wbody');if(!el)return;
+    if(!tasks.length){el.innerHTML='<div class="empty">No @thisweek tasks.</div><button class="btn btnp" onclick="next()">Next →</button>';return;}
+    const pl={1:'P1 🔴',2:'P2 🟡',3:'P3 🟢',4:'P4 ⚪'};
+    el.innerHTML=`${tasks.map(t=>`<div class="twitem p${t.priority||4}">
+      <div style="flex:1"><div style="font-size:14px;line-height:1.4">${t.content}</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:2px;font-weight:300">${pl[t.priority||4]} · ${t.due?t.due.date:'No date'}</div></div>
+      <button class="chip" id="twb-${t.id}" onclick="twToday('${t.id}')">→ Today</button>
+    </div>`).join('')}
+    <div class="brow"><button class="btn btnp" onclick="next()">Reviewed — next →</button></div>`;
+  }catch(e){document.getElementById('wbody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip →</button>';}
+}
+async function twToday(id){
+  const btn=document.getElementById('twb-'+id);
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{await setDue(id,iso());}catch(e){}
+  if(btn){btn.textContent='✓ Today';btn.className='chip ok';}
+}
+
+// WAITING
+function rWait(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">Waiting on</div>
+  <div class="sdesc">Things in someone else's court. Does anything need a follow-up nudge today?</div>
+  <div id="wabody"><div class="ld"><div class="spin"></div>Pulling @waiting...</div></div>
+  </div>`;
+  loadWait();
+}
+async function loadWait(){
+  try{
+    const tasks=await getLabeled('waiting');
+    const el=document.getElementById('wabody');if(!el)return;
+    if(!tasks.length){el.innerHTML='<div class="empty">Nothing waiting on anyone.</div><button class="btn btnp" onclick="next()">Next →</button>';return;}
+    el.innerHTML=`${tasks.map(t=>`<div class="witem">
+      <div style="flex:1"><div style="font-size:14px;line-height:1.4">${t.content}</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:2px;font-weight:300">${t.due?'Since '+t.due.date:'No date'}</div></div>
+      <button class="chip" id="wb-${t.id}" onclick="wToday('${t.id}')">Follow up today</button>
+    </div>`).join('')}
+    <div class="brow"><button class="btn btnp" onclick="next()">Reviewed — next →</button></div>`;
+  }catch(e){document.getElementById('wabody').innerHTML='<div class="err">Couldn\'t load.</div><button class="btn btnp" onclick="next()">Skip →</button>';}
+}
+async function wToday(id){
+  const btn=document.getElementById('wb-'+id);
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{await setDue(id,iso());}catch(e){}
+  if(btn){btn.textContent='✓ Scheduled';btn.className='chip ok';}
+}
+
+// BIG 3
+function rBig3(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">Pick your Big 3</div>
+  <div class="sdesc">Tap up to 3. Only 3. The rest can wait.</div>
+  <div id="b3body"><div class="ld"><div class="spin"></div>Pulling today's tasks...</div></div>
+  </div>`;
+  loadB3();
+}
+async function loadB3(){
+  try{const tasks=await getToday();showB3(tasks);}
+  catch(e){document.getElementById('b3body').innerHTML='<div class="err">Couldn\'t load tasks.</div><button class="btn btnp" onclick="next()">Skip →</button>';}
+}
+function showB3(tasks){
+  const el=document.getElementById('b3body');if(!el)return;
+  if(!tasks.length){el.innerHTML='<div class="empty">No tasks due today.</div><button class="btn btnp" onclick="next()">Continue →</button>';return;}
+  const sorted=[...tasks].sort((a,b)=>(a.priority||4)-(b.priority||4));
+  el.innerHTML=`<div class="cbadge">${big3.length}/3 selected</div>
+  ${sorted.map(t=>{
+    const sel=big3.find(s=>s.id===t.id);
+    const num=sel?big3.indexOf(sel)+1:'';
+    const ov=t.due&&t.due.date<iso();
+    const escaped=JSON.stringify(t).replace(/'/g,"&#39;");
+    return `<div class="ti p${t.priority||4}${sel?' sel':''}" onclick='togB3(${escaped})'>
+      <div class="tc${sel?' filled':''}">${num}</div>
+      <div style="flex:1"><div class="tn">${t.content}</div>
+      <div class="tsub">${ov?'⚠ Overdue':'Due today'}</div></div>
+    </div>`;
+  }).join('')}
+  <div class="brow"><button class="btn btnp" onclick="confB3()" ${!big3.length?'disabled':''}>Confirm Big 3 →</button></div>`;
+}
+function togB3(task){
+  const idx=big3.findIndex(t=>t.id===task.id);
+  if(idx>-1)big3.splice(idx,1);
+  else{if(big3.length>=3)return;big3.push(task);}
+  loadB3();
+}
+async function confB3(){
+  if(big3.length){try{await Promise.all(big3.map(t=>setDue(t.id,iso())));}catch(e){}}
+  next();
+}
+
+// GOALS
+function rGoals(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">30-second check</div>
+  <div class="sdesc">Does what you're doing today connect to these?</div>
+  <div style="margin-bottom:1.5rem">${GOALS.map(g=>`<div class="gi"><div class="ga">${g.area}</div><div class="gt">${g.text}</div></div>`).join('')}</div>
+  <button class="btn btnp" onclick="next()">Connected — set intention →</button>
+  </div>`;
+}
+
+// INTENTION
+function rInt(b,n,t){
+  b.innerHTML=`<div class="card">
+  <div class="snum">Step ${n} of ${t}</div>
+  <div class="stitle">Set your intention</div>
+  <div class="sdesc">Complete this: <em style="font-family:'DM Serif Display',serif">"Today is a win if..."</em></div>
+  <input class="txtin" id="iin" type="text" placeholder="the delivery sequence is complete and ads are live..." />
+  <div class="brow"><button class="btn btna" id="ibtn" onclick="subInt()">Lock it in 🔒</button></div>
+  <div id="iout"></div>
+  </div>`;
+}
+async function subInt(){
+  const val=document.getElementById('iin').value.trim();
+  if(!val)return;
+  intention='Today is a win if '+val;
+  const btn=document.getElementById('ibtn');
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Saving...';
+  try{await addTask('\uD83C\uDF05 Today\'s intention',intention,PR.daily,1,iso());next();}
+  catch(e){document.getElementById('iout').innerHTML='<div class="err">Couldn\'t save to Todoist.</div>';setTimeout(next,1500);}
+}
+
+// DONE
+function rDone(b){
+  const names=big3.map(t=>t.content);
+  b.innerHTML=`<div class="card" style="text-align:center;padding:2rem">
+    <div style="font-size:48px;margin-bottom:1rem">\uD83C\uDF05</div>
+    <div class="stitle" style="margin-bottom:.5rem">You're set.</div>
+    <div class="sdesc">Morning ritual complete. Go build.</div>
+  </div>
+  ${intention?`<div class="sb"><div class="slb">Win condition</div><div class="wt">${intention}</div></div>`:''}
+  ${names.length?`<div class="sb"><div class="slb">Big 3</div>${names.map((n,i)=>`<div class="b3r"><span class="b3n">${i+1}</span><span style="font-size:14px;color:var(--text);line-height:1.4">${n}</span></div>`).join('')}</div>`:''}
+  <button class="btn" onclick="reset()" style="margin-top:.5rem">\u21BA Start over</button>`;
+}
+
+function reset(){cur=0;big3=[];intention='';ibDone=new Set();render();}
+
+document.getElementById('dtag').textContent=dstr();
+render();
+</script>
+</body>
+</html>
