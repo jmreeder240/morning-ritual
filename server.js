@@ -31,7 +31,7 @@ const server = http.createServer((req, res) => {
 
     const options = {
       hostname: 'api.todoist.com',
-      path: '/rest/v2' + todoistPath,
+      path: '/api/v1' + todoistPath,
       method: req.method,
       headers: {
         'Authorization': 'Bearer ' + TOKEN,
