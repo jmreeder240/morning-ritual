@@ -90,7 +90,7 @@ let cur=0,big3=[],intention='',ibDone=new Set();
 function iso(){return new Date().toISOString().slice(0,10)}
 function dstr(){return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}
 
-async function tGet(p){const r=await fetch(API+p,{headers:{'Authorization':'Bearer '+TOKEN}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function tGet(p){const r=await fetch(API+p,{headers:{'Authorization':'Bearer '+TOKEN}});if(!r.ok)throw new Error(r.status);const d=await r.json();return Array.isArray(d)?d:(d.results||d);}
 async function tPost(p,d){const r=await fetch(API+p,{method:'POST',headers:{'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json()}
 async function tDel(p){await fetch(API+p,{method:'DELETE',headers:{'Authorization':'Bearer '+TOKEN}})}
 
