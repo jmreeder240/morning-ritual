@@ -7,842 +7,481 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink: #1A1814;
-  --paper: #F5F1EA;
-  --card: #FDFBF7;
-  --rule: #DDD8CE;
-  --dim: #8C8880;
-  --acc: #C4502A;
-  --acc-soft: #F5EAE5;
-  --gold: #B8932A;
-  --gold-soft: #F7F1E0;
-  --green: #2A7A4B;
-  --green-soft: #E5F2EC;
-  --blue: #2A5C8C;
-  --blue-soft: #E5EEF7;
-  --r: 3px;
-  --shadow: 0 2px 8px rgba(26,24,20,.08), 0 0 0 1px rgba(26,24,20,.04);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
-.wrap { max-width: 480px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
-
-/* Header */
-.masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1rem; margin-bottom: 1.5rem; }
-.masthead-top { display: flex; justify-content: space-between; align-items: baseline; }
-.brand { font-family: 'Playfair Display', serif; font-size: 26px; letter-spacing: -.5px; line-height: 1; }
-.dateline { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-weight: 500; }
-.step-track { display: flex; gap: 3px; margin-top: .75rem; }
-.step-pip { flex: 1; height: 2px; background: var(--rule); }
-.step-pip.done { background: var(--ink); }
-.step-pip.active { background: var(--acc); }
-.step-name { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-top: .5rem; font-weight: 500; }
-
-/* Cards */
-.card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--r); padding: 1.5rem; margin-bottom: .75rem; box-shadow: var(--shadow); animation: rise .25s ease; }
-@keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-.card-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin-bottom: .4rem; font-weight: 500; }
-.card-title { font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.15; margin-bottom: .75rem; letter-spacing: -.3px; }
-.card-body { font-size: 14px; color: var(--dim); line-height: 1.6; margin-bottom: 1.25rem; font-weight: 300; }
-
-/* Buttons */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--r); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1px solid var(--rule); background: transparent; color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; letter-spacing: .01em; }
-.btn:hover { background: var(--paper); }
-.btn:active { transform: scale(.98); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
-.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn-primary:hover { opacity: .85; background: var(--ink); }
-.btn-do { background: var(--green-soft); color: var(--green); border-color: rgba(42,122,75,.2); font-weight: 500; }
-.btn-do:hover { background: var(--green); color: #fff; border-color: var(--green); }
-.btn-del { background: var(--acc-soft); color: var(--acc); border-color: rgba(196,80,42,.2); font-weight: 500; }
-.btn-del:hover { background: var(--acc); color: #fff; border-color: var(--acc); }
-.btn-think { background: var(--gold-soft); color: var(--gold); border-color: rgba(184,147,42,.2); font-weight: 500; }
-.btn-think:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
-.btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
-.btn-skip { font-size: 12px; color: var(--dim); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; text-decoration: underline; text-decoration-color: transparent; }
-.btn-skip:hover { text-decoration-color: var(--dim); }
-
-/* Input */
-.input-row { display: flex; gap: 8px; margin-bottom: .75rem; }
-input[type=text], input[type=date] { width: 100%; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 300; transition: border .2s; }
-input:focus { outline: none; border-color: var(--ink); }
+:root{--ink:#1A1814;--paper:#F5F1EA;--card:#FDFBF7;--rule:#DDD8CE;--dim:#8C8880;--acc:#C4502A;--acc-soft:#F5EAE5;--gold:#B8932A;--gold-soft:#F7F1E0;--green:#2A7A4B;--green-soft:#E5F2EC;--blue:#2A5C8C;--blue-soft:#E5EEF7;--r:3px;--sh:0 2px 8px rgba(26,24,20,.08),0 0 0 1px rgba(26,24,20,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:1.5rem 1.25rem 5rem}
+.masthead{border-bottom:2px solid var(--ink);padding-bottom:1rem;margin-bottom:1.5rem}
+.masthead-top{display:flex;justify-content:space-between;align-items:baseline}
+.brand{font-family:'Playfair Display',serif;font-size:26px;letter-spacing:-.5px;line-height:1}
+.dateline{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+.step-track{display:flex;gap:3px;margin-top:.75rem}
+.step-pip{flex:1;height:2px;background:var(--rule)}
+.step-pip.done{background:var(--ink)}.step-pip.active{background:var(--acc)}
+.step-name{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-top:.5rem;font-weight:500}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:1.5rem;margin-bottom:.75rem;box-shadow:var(--sh);animation:rise .25s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem;font-weight:500}
+.card-title{font-family:'Playfair Display',serif;font-size:24px;line-height:1.15;margin-bottom:.75rem;letter-spacing:-.3px}
+.card-body{font-size:14px;color:var(--dim);line-height:1.6;margin-bottom:1.25rem;font-weight:300}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--rule);background:transparent;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;letter-spacing:.01em;white-space:nowrap}
+.btn:hover{background:var(--paper)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}.btn-primary:hover{opacity:.85;background:var(--ink)}
+.btn-do{background:var(--green-soft);color:var(--green);border-color:rgba(42,122,75,.2)}.btn-do:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-del{background:var(--acc-soft);color:var(--acc);border-color:rgba(196,80,42,.2)}.btn-del:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn-think{background:var(--gold-soft);color:var(--gold);border-color:rgba(184,147,42,.2)}.btn-think:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+.btn-file{background:var(--blue-soft);color:var(--blue);border-color:rgba(42,92,140,.2)}.btn-file:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:1.25rem}
+.btn-skip{font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 0;text-decoration:underline;text-decoration-color:transparent}
+.btn-skip:hover{text-decoration-color:var(--dim)}
+.input-row{display:flex;gap:8px;margin-bottom:.75rem}
+input[type=text],input[type=date],select{width:100%;padding:9px 11px;border-radius:var(--r);border:1px solid var(--rule);background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:300;transition:border .2s}
+input:focus,select:focus{outline:none;border-color:var(--ink)}
+select{cursor:pointer}
 
 /* Task items */
-.task-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px 10px 14px; background: var(--paper); border-radius: var(--r); border: 1px solid var(--rule); margin-bottom: 5px; border-left: 3px solid var(--rule); transition: all .2s; }
-.task-row.p1 { border-left-color: var(--acc); }
-.task-row.p2 { border-left-color: var(--gold); }
-.task-row.p3 { border-left-color: var(--green); }
-.task-row.decided { opacity: .35; pointer-events: none; }
-.task-info { flex: 1; min-width: 0; }
-.task-name { font-size: 14px; line-height: 1.4; word-break: break-word; }
-.task-meta { font-size: 11px; color: var(--dim); margin-top: 2px; font-weight: 300; }
-.task-actions { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
-.tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--rule); color: var(--dim); background: var(--paper); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
-.tag.inbox { border-color: rgba(42,92,140,.3); color: var(--blue); background: var(--blue-soft); }
-.tag.overdue { border-color: rgba(196,80,42,.3); color: var(--acc); background: var(--acc-soft); }
-.tag.deliberate { border-color: rgba(184,147,42,.3); color: var(--gold); background: var(--gold-soft); }
-.tag.thisweek { border-color: rgba(42,122,75,.3); color: var(--green); background: var(--green-soft); }
-.tag.waiting { border-color: rgba(100,100,100,.3); color: var(--dim); }
-.tag.recurring { border-color: rgba(42,92,140,.3); color: var(--blue); background: var(--blue-soft); }
+.task-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px 10px 14px;background:var(--paper);border-radius:var(--r);border:1px solid var(--rule);margin-bottom:5px;border-left:3px solid var(--rule);transition:all .2s}
+.task-row.p1{border-left-color:var(--acc)}.task-row.p2{border-left-color:var(--gold)}.task-row.p3{border-left-color:var(--green)}
+.task-row.decided{opacity:.3;pointer-events:none}
+.task-row.do-it{background:var(--green-soft);border-color:rgba(42,122,75,.2);border-left-color:var(--green)}
+.task-row.deliberated{background:var(--gold-soft);border-color:rgba(184,147,42,.2);border-left-color:var(--gold)}
+.task-row.dumped{background:var(--acc-soft);border-color:rgba(196,80,42,.2);border-left-color:var(--acc);opacity:.5}
+.task-row.filed{background:var(--blue-soft);border-color:rgba(42,92,140,.2);border-left-color:var(--blue)}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:13px;line-height:1.4;word-break:break-word}
+.task-meta{font-size:11px;color:var(--dim);margin-top:2px;font-weight:300}
+.task-actions{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--rule);color:var(--dim);background:var(--paper);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.tag.inbox{border-color:rgba(42,92,140,.3);color:var(--blue);background:var(--blue-soft)}
+.tag.overdue{border-color:rgba(196,80,42,.3);color:var(--acc);background:var(--acc-soft)}
+.tag.deliberate{border-color:rgba(184,147,42,.3);color:var(--gold);background:var(--gold-soft)}
+.tag.thisweek{border-color:rgba(42,122,75,.3);color:var(--green);background:var(--green-soft)}
+.tag.waiting{border-color:rgba(100,100,100,.3);color:var(--dim)}
+.tag.recurring{border-color:rgba(42,92,140,.3);color:var(--blue);background:var(--blue-soft)}
 
-/* Deliberate date picker */
-.deliberate-panel { background: var(--gold-soft); border: 1px solid rgba(184,147,42,.25); border-radius: var(--r); padding: 10px 12px; margin-top: 6px; display: none; }
-.deliberate-panel.open { display: block; }
-.deliberate-label { font-size: 11px; color: var(--gold); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-.date-opts { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
-.date-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid rgba(184,147,42,.3); background: #fff; color: var(--gold); font-family: inherit; transition: all .15s; font-weight: 500; }
-.date-chip:hover, .date-chip.sel { background: var(--gold); color: #fff; border-color: var(--gold); }
-.date-confirm { margin-top: 6px; }
+/* Sub panel for deliberate/file */
+.sub-panel{background:#fff;border:1px solid var(--rule);border-radius:var(--r);padding:10px 12px;margin-top:6px;display:none}
+.sub-panel.open{display:block}
+.sub-label{font-size:10px;color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.date-opts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+.date-chip{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font-family:inherit;transition:all .15s;font-weight:400}
+.date-chip:hover,.date-chip.sel{background:var(--gold);color:#fff;border-color:var(--gold)}
+.proj-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.proj-chip{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--blue-soft);background:var(--blue-soft);color:var(--blue);font-family:inherit;transition:all .15s;font-weight:400}
+.proj-chip:hover,.proj-chip.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-/* Section headers */
-.section-head { font-family: 'Playfair Display', serif; font-size: 15px; padding: .5rem 0; border-bottom: 1px solid var(--rule); margin-bottom: .75rem; margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: baseline; }
-.section-count { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; color: var(--dim); font-weight: 300; }
+/* Summary groups */
+.section-head{font-family:'Playfair Display',serif;font-size:15px;padding:.4rem 0;border-bottom:1px solid var(--rule);margin-bottom:.5rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:baseline}
+.section-count{font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--dim);font-weight:300}
+.decision-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-left:6px}
+.db-do{background:var(--green-soft);color:var(--green)}
+.db-del{background:var(--acc-soft);color:var(--acc)}
+.db-think{background:var(--gold-soft);color:var(--gold)}
+.db-file{background:var(--blue-soft);color:var(--blue)}
 
-/* Priority ranking */
-.rank-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--paper); border-radius: var(--r); border: 1px solid var(--rule); margin-bottom: 5px; cursor: pointer; transition: all .15s; }
-.rank-item:hover { border-color: var(--ink); }
-.rank-num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--rule); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--dim); flex-shrink: 0; font-family: 'Playfair Display', serif; transition: all .2s; }
-.rank-item.focus .rank-num { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.rank-item.focus { border-color: var(--ink); background: var(--card); }
-.rank-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; font-weight: 500; }
+/* Priority editor */
+.rank-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--paper);border-radius:var(--r);border:1px solid var(--rule);margin-bottom:5px;border-left:3px solid var(--rule);transition:all .2s}
+.rank-item.p1{border-left-color:var(--acc)}.rank-item.p2{border-left-color:var(--gold)}.rank-item.p3{border-left-color:var(--green)}
+.rank-num{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--dim);flex-shrink:0;font-family:'Playfair Display',serif;transition:all .2s;cursor:pointer}
+.rank-item.focused .rank-num{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.rank-item.focused{border-color:var(--ink);background:var(--card)}
+.p-select{padding:3px 6px;border-radius:var(--r);border:1px solid var(--rule);background:var(--paper);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--dim);cursor:pointer;width:auto}
+.p-select:focus{outline:none;border-color:var(--ink)}
 
 /* Goals */
-.goal-row { padding: 10px 14px; border-left: 3px solid var(--ink); margin-bottom: 8px; background: var(--card); border-radius: 0 var(--r) var(--r) 0; }
-.goal-area { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--acc); font-weight: 500; margin-bottom: 2px; }
-.goal-text { font-size: 13px; line-height: 1.45; font-weight: 300; }
+.goal-row{padding:10px 14px;border-left:3px solid var(--ink);margin-bottom:8px;background:var(--card);border-radius:0 var(--r) var(--r) 0}
+.goal-area{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);font-weight:500;margin-bottom:2px}
+.goal-text{font-size:13px;line-height:1.45;font-weight:300}
 
 /* Loading */
-.loading { display: flex; align-items: center; gap: 10px; color: var(--dim); font-size: 13px; padding: .75rem 0; font-weight: 300; }
-.spin { width: 16px; height: 16px; border: 1.5px solid var(--rule); border-top-color: var(--acc); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty-note { font-size: 13px; color: var(--dim); font-style: italic; font-weight: 300; padding: .5rem 0; margin-bottom: .75rem; }
+.loading{display:flex;align-items:center;gap:10px;color:var(--dim);font-size:13px;padding:.75rem 0;font-weight:300}
+.spin{width:16px;height:16px;border:1.5px solid var(--rule);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-note{font-size:13px;color:var(--dim);font-style:italic;font-weight:300;padding:.5rem 0;margin-bottom:.75rem}
 
-/* Done screen */
-.done-rank { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
-.done-rank:last-child { border-bottom: none; }
-.done-n { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--dim); width: 24px; flex-shrink: 0; font-style: italic; }
-.done-n.focus { color: var(--acc); }
-
-/* Divider */
-.rule-line { border: none; border-top: 1px solid var(--rule); margin: 1rem 0; }
-
-/* Back */
-.back-link { font-size: 12px; color: var(--dim); background: none; border: none; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 1rem; padding: 0; }
-.back-link:hover { color: var(--ink); }
-
-/* Summary grouped */
-.group-block { margin-bottom: 1rem; }
-
-/* Badge */
-.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-.badge-do { background: var(--green-soft); color: var(--green); }
-.badge-del { background: var(--acc-soft); color: var(--acc); }
-.badge-think { background: var(--gold-soft); color: var(--gold); }
+/* Done */
+.done-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.done-row:last-child{border-bottom:none}
+.done-n{font-family:'Playfair Display',serif;font-size:20px;color:var(--dim);width:24px;flex-shrink:0;font-style:italic}
+.done-n.focus{color:var(--acc)}
+.back-link{font-size:12px;color:var(--dim);background:none;border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;margin-bottom:1rem;padding:0}
+.back-link:hover{color:var(--ink)}
+.sort-bar{display:flex;gap:6px;align-items:center;margin-bottom:.75rem;flex-wrap:wrap}
+.sort-btn{padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--dim);font-family:inherit;font-weight:500;transition:all .15s}
+.sort-btn.active,.sort-btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+hr{border:none;border-top:1px solid var(--rule);margin:.75rem 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="masthead">
-    <div class="masthead-top">
-      <div class="brand">Start My Day</div>
-      <div class="dateline" id="dateline"></div>
-    </div>
+    <div class="masthead-top"><div class="brand">Start My Day</div><div class="dateline" id="dateline"></div></div>
     <div class="step-track" id="step-track"></div>
     <div class="step-name" id="step-name"></div>
   </div>
   <div id="main"></div>
 </div>
-
 <script>
-const PROXY = 'https://morning-ritual-production.up.railway.app/todoist';
-const PR = {
-  rebuilt: '6gXj8W3Cmh5jfpX8',
-  personal: '6ghgHCjF6vv6mMM9',
-  re: '6gXj8VxFCvr7vqcM',
-  someday: '6gXj8Vx23x479X5j',
-  daily: '6gj8HWmhQ49gXjQC',
-  inbox: '6fw8r3f3225prXvg'
-};
-const GOALS = [
-  { area: 'Rebuilt', text: 'Run 4 cohorts + convert 3-5 cold traffic clients by Aug 19' },
-  { area: 'Health & Fitness', text: 'Train weights 3x/week for 12 consecutive weeks - zero injuries by Aug 19' },
-  { area: 'Family & Relationships', text: 'Attend AA meetings 3x/week for 90 days by Aug 19' },
-  { area: 'Real Estate', text: 'Find next listing opportunity' },
-  { area: 'Home & Life Admin', text: 'Keep life admin stable - bills current, nothing falling through the cracks' }
+const PROXY='https://morning-ritual-production.up.railway.app/todoist';
+const PR={rebuilt:'6gXj8W3Cmh5jfpX8',personal:'6ghgHCjF6vv6mMM9',re:'6gXj8VxFCvr7vqcM',someday:'6gXj8Vx23x479X5j',daily:'6gj8HWmhQ49gXjQC',inbox:'6fw8r3f3225prXvg'};
+const PROJECTS=[{id:'6gXj8W3Cmh5jfpX8',name:'Rebuilt'},{id:'6ghgHCjF6vv6mMM9',name:'Personal'},{id:'6gXj8VxFCvr7vqcM',name:'Real Estate'},{id:'6gXj8Vx23x479X5j',name:'Someday'}];
+const GOALS=[
+  {area:'Rebuilt',text:'Run 4 cohorts + convert 3-5 cold traffic clients by Aug 19'},
+  {area:'Health & Fitness',text:'Train weights 3x/week for 12 consecutive weeks - zero injuries by Aug 19'},
+  {area:'Family & Relationships',text:'Attend AA meetings 3x/week for 90 days by Aug 19'},
+  {area:'Real Estate',text:'Find next listing opportunity'},
+  {area:'Home & Life Admin',text:'Keep life admin stable - bills current, nothing falling through the cracks'}
 ];
-const STEPS = ['Brain', 'Targets', 'Decide', 'Recurring', 'Prioritize', 'Intention', 'Done'];
+const STEPS=['Brain','Targets','Decide','Recurring','Prioritize','Intention','Done'];
 
-var cur = 0;
-var state = {
-  brainLines: [],
-  decideItems: [],   // all items to decide on
-  doItItems: [],     // after first pass
-  finalItems: [],    // after second pass (do it now)
-  delegateItems: [], // flagged delegate
-  scheduleItems: [], // flagged schedule
-  recurringItems: [],
-  todayCommitted: [], // final list going to prioritize
-  ranked: [],
-  intention: ''
-};
-var ibDone = new Set();
+var cur=0,brainLines=[],allItems=[],decisions={},deletedIds=new Set(),
+    recurDone=new Set(),recurAdded=[],finalItems=[],todayCommitted=[],
+    ranked=[],intention='',sortMode='priority',refineDecisions={},
+    taskRegistry={};
 
-// ── API ──────────────────────────────────────────────────
-function iso() { return new Date().toISOString().slice(0, 10); }
-function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
-function dstr() { return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); }
-function pLabel(p) { return p === 1 ? 'P1' : p === 2 ? 'P2' : p === 3 ? 'P3' : 'P4'; }
-function sortP(arr) { return arr.slice().sort(function(a, b) { return (a.priority || 4) - (b.priority || 4); }); }
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-
-async function tGet(path) {
-  var r = await fetch(PROXY + path);
-  if (!r.ok) throw new Error(r.status);
-  var d = await r.json();
-  return Array.isArray(d) ? d : (d.results || d);
+function iso(){return new Date().toISOString().slice(0,10);}
+function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function dstr(){return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+function pLabel(p){return p===1?'P1':p===2?'P2':p===3?'P3':'P4';}
+function sortP(arr){return arr.slice().sort(function(a,b){return (a.priority||4)-(b.priority||4);});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function btn(cls,icon,label,action,id){
+  return '<button class="btn '+cls+'" data-action="'+action+'" data-id="'+(id||'')+'" onclick="handleClick(this)">'+icon+' '+label+'</button>';
 }
-async function tPost(path, data) {
-  var r = await fetch(PROXY + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  if (!r.ok) throw new Error(r.status);
-  return r.status === 204 ? null : r.json();
-}
-async function tDel(path) { await fetch(PROXY + path, { method: 'DELETE' }); }
 
-async function getInbox() { return tGet('/tasks?project_id=' + PR.inbox); }
-async function getOverdue() {
-  var tasks = await tGet('/tasks?filter=' + encodeURIComponent('overdue'));
-  return tasks.filter(function(t) {
-    if (t.due && t.due.is_recurring) return false;
-    var c = t.content.toLowerCase();
-    return !c.includes('intention') && !c.includes('review 90') && !c.includes('90-day goal') && !c.includes('sunday review') && !c.includes('standing agenda') && t.project_id !== PR.daily;
+async function tGet(p){var r=await fetch(PROXY+p);if(!r.ok)throw new Error(r.status);var d=await r.json();return Array.isArray(d)?d:(d.results||d);}
+async function tPost(p,data){var r=await fetch(PROXY+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json();}
+async function tDel(p){await fetch(PROXY+p,{method:'DELETE'});}
+async function getInbox(){return tGet('/tasks?project_id='+PR.inbox);}
+async function getOverdue(){
+  var t=await tGet('/tasks?filter='+encodeURIComponent('overdue'));
+  return t.filter(function(x){
+    if(x.due&&x.due.is_recurring)return false;
+    var c=x.content.toLowerCase();
+    return !c.includes('intention')&&!c.includes('review 90')&&!c.includes('90-day goal')&&!c.includes('sunday review')&&!c.includes('standing agenda')&&x.project_id!==PR.daily&&!deletedIds.has(x.id);
   });
 }
-async function getDeliberate() {
-  var tasks = await tGet('/tasks?label=' + encodeURIComponent('deliberate'));
-  var today = iso();
-  return tasks.filter(function(t) { return t.due && t.due.date <= today; });
+async function getDeliberateDue(){var t=await tGet('/tasks?label=deliberate');var today=iso();return t.filter(function(x){return x.due&&x.due.date<=today;});}
+async function getThisweekUnscheduled(){var t=await tGet('/tasks?label=thisweek');var today=iso();return t.filter(function(x){return !x.due||x.due.date===today;});}
+async function getWaiting(){return tGet('/tasks?label=waiting');}
+async function getRecurring(){var t=await tGet('/tasks?filter='+encodeURIComponent('due: today | overdue'));return t.filter(function(x){return x.due&&x.due.is_recurring&&!deletedIds.has(x.id);});}
+async function getToday(){var t=await tGet('/tasks?filter='+encodeURIComponent('due: today'));return sortP(t.filter(function(x){var c=x.content.toLowerCase();return !c.includes('intention')&&!c.includes('review 90')&&x.project_id!==PR.daily&&!deletedIds.has(x.id);}));}
+async function delTask(id){deletedIds.add(id);return tDel('/tasks/'+id);}
+async function setDue(id,date){return tPost('/tasks/'+id,{due_date:date});}
+async function setLabels(id,labels){return tPost('/tasks/'+id,{labels:labels});}
+async function setPriority(id,prio){return tPost('/tasks/'+id,{priority:prio});}
+async function moveTask(id,pid){return tPost('/tasks/'+id,{project_id:pid});}
+async function addTask(content,desc,pid,prio,due){var b={content:content,project_id:pid,priority:prio||4};if(desc)b.description=desc;if(due)b.due_date=due;return tPost('/tasks',b);}
+
+function updHdr(){
+  document.getElementById('step-track').innerHTML=STEPS.map(function(s,i){return '<div class="step-pip '+(i<cur?'done':i===cur?'active':'')+'"></div>';}).join('');
+  document.getElementById('step-name').textContent=STEPS[cur];
 }
-async function getThisweekUnscheduled() {
-  var tasks = await tGet('/tasks?label=' + encodeURIComponent('thisweek'));
-  var today = iso();
-  return tasks.filter(function(t) { return !t.due || t.due.date === today; });
+function next(){if(cur<STEPS.length-1){cur++;render();}}
+function back(){if(cur>0){cur--;render();}}
+function bbtn(){return cur>0?'<button class="back-link" onclick="back()">&#8592; Back</button>':'';}
+function render(){updHdr();var m=document.getElementById('main'),s=STEPS[cur];if(s==='Brain')rBrain(m);else if(s==='Targets')rTargets(m);else if(s==='Decide')rDecide(m);else if(s==='Recurring')rRecurring(m);else if(s==='Prioritize')rPrioritize(m);else if(s==='Intention')rIntention(m);else rDone(m);}
+
+// BRAIN
+function rBrain(m){
+  brainLines=[];
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 1 of '+(STEPS.length-1)+'</div><div class="card-title">Morning brainstorm</div><div class="card-body">Clear your mind. Type anything and hit Enter. Everything goes to your inbox.</div><div class="input-row"><input type="text" id="bin" placeholder="Type a thought and hit Enter..." /><button class="btn btn-primary" onclick="addBI()">Add</button></div><div id="blist"></div><div class="btn-row"><button class="btn btn-primary" id="bsbtn" onclick="subBrain()">Done &#8212; send to inbox</button><button class="btn-skip" onclick="next()">Nothing on my mind</button></div></div>';
+  setTimeout(function(){var inp=document.getElementById('bin');if(inp){inp.focus();inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addBI();}});}},100);
 }
-async function getWaiting() { return tGet('/tasks?label=' + encodeURIComponent('waiting')); }
-async function getRecurring() {
-  var tasks = await tGet('/tasks?filter=' + encodeURIComponent('due: today | overdue'));
-  return tasks.filter(function(t) { return t.due && t.due.is_recurring; });
+function addBI(){var inp=document.getElementById('bin');if(!inp)return;var val=inp.value.trim();if(!val)return;brainLines.push(val);inp.value='';inp.focus();renderBL();}
+function removeBL(i){brainLines.splice(i,1);renderBL();}
+function renderBL(){
+  var el=document.getElementById('blist');if(!el)return;
+  el.innerHTML=brainLines.map(function(l,i){return '<div class="task-row"><div class="task-info"><div class="task-name">'+esc(l)+'</div></div><button data-action="removebrain" data-idx="'+i+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px">&times;</button></div>';}).join('');
 }
-async function getToday() {
-  var tasks = await tGet('/tasks?filter=' + encodeURIComponent('due: today'));
-  return sortP(tasks.filter(function(t) {
-    var c = t.content.toLowerCase();
-    return !c.includes('intention') && !c.includes('review 90') && t.project_id !== PR.daily;
-  }));
-}
-async function delTask(id) { return tDel('/tasks/' + id); }
-async function setDue(id, date) { return tPost('/tasks/' + id, { due_date: date }); }
-async function setLabels(id, labels) { return tPost('/tasks/' + id, { labels: labels }); }
-async function moveTask(id, pid) { return tPost('/tasks/' + id, { project_id: pid }); }
-async function addTask(content, desc, pid, prio, due) {
-  var b = { content: content, project_id: pid, priority: prio || 4 };
-  if (desc) b.description = desc;
-  if (due) b.due_date = due;
-  return tPost('/tasks', b);
+async function subBrain(){if(!brainLines.length){next();return;}var btn=document.getElementById('bsbtn');btn.disabled=true;btn.textContent='Sending...';try{for(var i=0;i<brainLines.length;i++){await addTask(brainLines[i],'From morning brainstorm',PR.inbox,4,null);}brainLines=[];next();}catch(e){btn.disabled=false;btn.textContent='Done - send to inbox';}}
+
+// TARGETS
+function rTargets(m){
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 2 of '+(STEPS.length-1)+'</div><div class="card-title">Review your targets</div><div class="card-body">Your 90-day goals. Let them guide every decision that follows.</div>'+GOALS.map(function(g){return '<div class="goal-row"><div class="goal-area">'+g.area+'</div><div class="goal-text">'+g.text+'</div></div>';}).join('')+'<div class="btn-row"><button class="btn btn-primary" onclick="next()">Targets reviewed &#8212; start deciding</button></div></div>';
 }
 
-// ── HEADER ───────────────────────────────────────────────
-function updHdr() {
-  document.getElementById('step-track').innerHTML = STEPS.map(function(s, i) {
-    var c = i < cur ? 'done' : i === cur ? 'active' : '';
-    return '<div class="step-pip ' + c + '"></div>';
-  }).join('');
-  document.getElementById('step-name').textContent = STEPS[cur];
-}
-function next() { if (cur < STEPS.length - 1) { cur++; render(); } }
-function back() { if (cur > 0) { cur--; render(); } }
-function bbtn() {
-  return cur > 0 ? '<button class="back-link" onclick="back()">&#8592; Back</button>' : '';
-}
+// DECIDE
+var decidePhase='deciding'; // 'deciding' or 'summary'
+var deliberateSel={}; // id -> {date, projectId}
 
-function render() {
-  updHdr();
-  var m = document.getElementById('main');
-  var s = STEPS[cur];
-  if (s === 'Brain') rBrain(m);
-  else if (s === 'Targets') rTargets(m);
-  else if (s === 'Decide') rDecide(m);
-  else if (s === 'Recurring') rRecurring(m);
-  else if (s === 'Prioritize') rPrioritize(m);
-  else if (s === 'Intention') rIntention(m);
-  else rDone(m);
-}
-
-// ── STEP 1: BRAIN ────────────────────────────────────────
-function rBrain(m) {
-  state.brainLines = [];
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 1 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Morning brainstorm</div>' +
-    '<div class="card-body">Clear your mind. Type anything — tasks, ideas, worries, half-baked thoughts. Hit Enter after each one. Everything goes to your inbox to decide on next.</div>' +
-    '<div class="input-row"><input type="text" id="bin" placeholder="Type a thought and hit Enter..." /><button class="btn btn-primary" onclick="addBI()">Add</button></div>' +
-    '<div id="blist"></div>' +
-    '<div class="btn-row"><button class="btn btn-primary" id="bsbtn" onclick="subBrain()">Done &#8212; send to inbox</button><button class="btn-skip" onclick="next()">Nothing on my mind</button></div></div>';
-  setTimeout(function() {
-    var inp = document.getElementById('bin');
-    if (inp) { inp.focus(); inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); addBI(); } }); }
-  }, 100);
-}
-function addBI() {
-  var inp = document.getElementById('bin'); if (!inp) return;
-  var val = inp.value.trim(); if (!val) return;
-  state.brainLines.push(val); inp.value = ''; inp.focus(); renderBL();
-}
-function removeBL(i) { state.brainLines.splice(i, 1); renderBL(); }
-function renderBL() {
-  var el = document.getElementById('blist'); if (!el) return;
-  el.innerHTML = state.brainLines.map(function(l, i) {
-    return '<div class="task-row" style="margin-bottom:4px"><div class="task-info"><div class="task-name">' + esc(l) + '</div></div><button onclick="removeBL(' + i + ')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;flex-shrink:0">&times;</button></div>';
-  }).join('');
-}
-async function subBrain() {
-  if (!state.brainLines.length) { next(); return; }
-  var btn = document.getElementById('bsbtn'); btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    for (var i = 0; i < state.brainLines.length; i++) {
-      await addTask(state.brainLines[i], 'From morning brainstorm', PR.inbox, 4, null);
-    }
-    state.brainLines = []; next();
-  } catch(e) { btn.disabled = false; btn.textContent = 'Done - send to inbox'; }
-}
-
-// ── STEP 2: TARGETS ──────────────────────────────────────
-function rTargets(m) {
-  var goalRows = GOALS.map(function(g) {
-    return '<div class="goal-row"><div class="goal-area">' + g.area + '</div><div class="goal-text">' + g.text + '</div></div>';
-  }).join('');
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 2 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Review your targets</div>' +
-    '<div class="card-body">Your 90-day goals. Read them. Let them guide every decision you make in the next steps.</div>' +
-    goalRows +
-    '<div class="btn-row"><button class="btn btn-primary" onclick="next()">Targets reviewed &#8212; start deciding</button></div></div>';
-}
-
-// ── STEP 3: DECIDE ───────────────────────────────────────
-function rDecide(m) {
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 3 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Do it, deliberate, or dump it</div>' +
-    '<div class="card-body">Every item gets a decision. Nothing passes through undecided.</div>' +
-    '<div id="decide-body"><div class="loading"><div class="spin"></div>Pulling everything that needs a decision...</div></div></div>';
+function rDecide(m){
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 3 of '+(STEPS.length-1)+'</div><div class="card-title">Do it, deliberate, or dump it</div><div class="card-body">Every item gets a decision. Nothing passes through undecided.</div><div id="decide-body"><div class="loading"><div class="spin"></div>Pulling everything that needs a decision...</div></div></div>';
   loadDecide();
 }
-
-var decideDecisions = {}; // id -> {action, date}
-var decideAllItems = [];
-var decideSummaryShown = false;
-
-async function loadDecide() {
-  try {
-    var inbox = await getInbox();
-    var overdue = await getOverdue();
-    var deliberate = await getDeliberate();
-    var thisweek = await getThisweekUnscheduled();
-    var waiting = await getWaiting();
-
-    // tag each item with source
-    inbox.forEach(function(t) { t._source = 'inbox'; });
-    overdue.forEach(function(t) { t._source = 'overdue'; });
-    deliberate.forEach(function(t) { t._source = 'deliberate'; });
-    thisweek.forEach(function(t) { t._source = 'thisweek'; });
-    waiting.forEach(function(t) { t._source = 'waiting'; });
-
-    // dedupe by id
-    var seen = new Set();
-    var all = [];
-    [inbox, overdue, deliberate, thisweek, waiting].forEach(function(arr) {
-      arr.forEach(function(t) { if (!seen.has(t.id)) { seen.add(t.id); all.push(t); } });
-    });
-
-    decideAllItems = sortP(all);
-    decideDecisions = {};
-    decideSummaryShown = false;
-    showDecideItems();
-  } catch(e) {
-    document.getElementById('decide-body').innerHTML = '<div class="empty-note">Could not load items.</div><button class="btn btn-primary" onclick="next()">Skip</button>';
-  }
+async function loadDecide(){
+  try{
+    var inbox=await getInbox(),overdue=await getOverdue(),delib=await getDeliberateDue(),tw=await getThisweekUnscheduled(),wait=await getWaiting();
+    var tag=function(arr,src){arr.forEach(function(t){t._src=src;taskRegistry[t.id]=t;});};
+    tag(inbox,'inbox');tag(overdue,'overdue');tag(delib,'deliberate');tag(tw,'thisweek');tag(wait,'waiting');
+    var seen=new Set(),all=[];
+    [inbox,overdue,delib,tw,wait].forEach(function(arr){arr.forEach(function(t){if(!seen.has(t.id)&&!deletedIds.has(t.id)){seen.add(t.id);all.push(t);}});});
+    allItems=sortP(all);decisions={};deliberateSel={};decidePhase='deciding';
+    showDecide();
+  }catch(e){document.getElementById('decide-body').innerHTML='<div class="empty-note">Could not load items.</div><button class="btn btn-primary" onclick="next()">Skip</button>';}
 }
 
-function sourceTag(src) {
-  var labels = { inbox: 'Inbox', overdue: 'Overdue', deliberate: 'Deliberate', thisweek: 'This week', waiting: 'Waiting' };
-  return '<span class="tag ' + src + '">' + (labels[src] || src) + '</span>';
-}
+function srcTag(src){var m={inbox:'Inbox',overdue:'Overdue',deliberate:'Deliberate',thisweek:'This week',waiting:'Waiting'};return '<span class="tag '+src+'">'+(m[src]||src)+'</span>';}
 
-function showDecideItems() {
-  var el = document.getElementById('decide-body'); if (!el) return;
-  var pending = decideAllItems.filter(function(t) { return !decideDecisions[t.id]; });
+function showDecide(){
+  if(decidePhase==='summary'){showSummary();return;}
+  var el=document.getElementById('decide-body');if(!el)return;
+  var pending=allItems.filter(function(t){return !decisions[t.id]&&!deletedIds.has(t.id);});
+  var decided=allItems.filter(function(t){return decisions[t.id];});
+  if(!allItems.length){el.innerHTML='<div class="empty-note">Nothing needs a decision.</div><button class="btn btn-primary" onclick="next()">Next</button>';return;}
+  if(!pending.length){decidePhase='summary';showSummary();return;}
 
-  if (!decideAllItems.length) {
-    el.innerHTML = '<div class="empty-note">Nothing needs a decision right now. Decks are clear.</div><button class="btn btn-primary" onclick="next()">Next</button>';
-    return;
+  var topHtml='';
+  if(decided.length){
+    var dmap={do:{cls:'do-it',label:'Do it'},file:{cls:'filed',label:'Filed'},deliberate:{cls:'deliberated',label:'Deliberate'},dump:{cls:'dumped',label:'Dump'}};
+    topHtml=decided.map(function(t){var d=decisions[t.id],dm=dmap[d.action]||{};var extra='';if(d.action==='deliberate'&&d.date)extra=' &middot; '+d.date;if(d.action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=' &middot; '+p.name;}return '<div class="task-row '+(dm.cls||'')+'" style="margin-bottom:4px"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta"><span style="font-size:10px;font-weight:500">'+dm.label+'</span>'+extra+'<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-left:8px;font-family:inherit;text-decoration:underline">change</button></div></div></div>';}).join('')+'<hr>';
   }
 
-  if (!pending.length && !decideSummaryShown) {
-    showDecideSummary();
-    return;
-  }
+  var pendingHtml=pending.map(function(t){
+    return '<div class="task-row p'+(t.priority||4)+'" id="dr-'+t.id+'">'+
+      '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
+      '<div class="task-meta">'+pLabel(t.priority||4)+' &middot; '+srcTag(t._src)+'</div>'+
+      '<div class="task-actions">'+
+      '<button class="btn btn-do" data-action="decide-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it</button>'+
+      '<button class="btn btn-file" data-action="open-file" data-id="'+t.id+'" onclick="handleClick(this)">&#8594; File it</button>'+
+      '<button class="btn btn-think" data-action="open-delib" data-id="'+t.id+'" onclick="handleClick(this)">&#8986; Deliberate</button>'+
+      '<button class="btn btn-del" data-action="decide-dump" data-id="'+t.id+'" onclick="handleClick(this)">&#215; Dump it</button>'+
+      '</div>'+
+      '<div class="sub-panel" id="fp-'+t.id+'">'+
+      '<div class="sub-label">Move to project</div>'+
+      '<div class="proj-chips">'+PROJECTS.map(function(p){return '<button class="proj-chip" data-action="file-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
+      '</div>'+
+      '<div class="sub-panel" id="dp-'+t.id+'">'+
+      '<div class="sub-label">Surface back up...</div>'+
+      '<div class="date-opts">'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
+      '</div>'+
+      '<div id="delib-custom-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="deliberateCustomDate(\''+t.id+'\',this.value)" /></div>'+
+      '<div class="proj-chips" style="margin-top:6px"><span style="font-size:11px;color:var(--dim)">Also file in:</span>'+PROJECTS.map(function(p){return '<button class="proj-chip" id="delfp-'+t.id+'-'+p.id+'" data-action="delib-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
+      '</div>'+
+      '</div></div>';
+  }).join('');
 
-  var decided = decideAllItems.filter(function(t) { return decideDecisions[t.id]; });
-  var doCount = decided.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'do'; }).length;
-  var delCount = decided.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'dump'; }).length;
-  var thinkCount = decided.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'deliberate'; }).length;
-
-  var progress = decided.length + '/' + decideAllItems.length + ' decided';
-
-  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">' +
-    '<div style="font-size:11px;color:var(--dim);font-weight:300">' + progress + '</div>' +
-    '<div style="display:flex;gap:5px">' +
-    (doCount ? '<span class="badge badge-do">&#10003; ' + doCount + ' do it</span>' : '') +
-    (thinkCount ? '<span class="badge badge-think">&#8986; ' + thinkCount + ' deliberate</span>' : '') +
-    (delCount ? '<span class="badge badge-del">&#215; ' + delCount + ' dump</span>' : '') +
-    '</div></div>' +
-    pending.map(function(t) {
-      return '<div class="task-row p' + (t.priority || 4) + '" id="di-' + t.id + '">' +
-        '<div class="task-info">' +
-        '<div class="task-name">' + esc(t.content) + '</div>' +
-        '<div class="task-meta">' + pLabel(t.priority || 4) + ' &middot; ' + sourceTag(t._source) + '</div>' +
-        '<div class="task-actions">' +
-        '<button class="btn btn-do" onclick="decide(\'' + t.id + '\',\'do\')">&#10003; Do it</button>' +
-        '<button class="btn btn-think" onclick="openDeliberate(\'' + t.id + '\')">&#8986; Deliberate</button>' +
-        '<button class="btn btn-del" onclick="decide(\'' + t.id + '\',\'dump\')">&#215; Dump it</button>' +
-        '</div>' +
-        '<div class="deliberate-panel" id="dp-' + t.id + '">' +
-        '<div class="deliberate-label">Surface this back up...</div>' +
-        '<div class="date-opts">' +
-        '<button class="date-chip" onclick="pickDate(\'' + t.id + '\',\'tomorrow\')">Tomorrow</button>' +
-        '<button class="date-chip" onclick="pickDate(\'' + t.id + '\',\'nextweek\')">Next week</button>' +
-        '<button class="date-chip" onclick="pickDate(\'' + t.id + '\',\'custom\')">Pick date</button>' +
-        '</div>' +
-        '<input type="date" id="customdate-' + t.id + '" style="display:none;margin-top:6px" />' +
-        '<div class="date-confirm"><button class="btn btn-think" id="dconfirm-' + t.id + '" style="display:none" onclick="confirmDeliberate(\'' + t.id + '\')">Confirm</button></div>' +
-        '</div>' +
-        '</div></div>';
-    }).join('') +
-    '<div class="btn-row"><button class="btn-skip" onclick="skipRemaining()">Skip remaining ' + pending.length + ' items</button></div>';
+  el.innerHTML=topHtml+pendingHtml+'<div class="btn-row"><button class="btn-skip" data-action="skip-remaining" onclick="handleClick(this)">Skip remaining '+pending.length+' items</button></div>';
 }
 
-function openDeliberate(id) {
-  var panel = document.getElementById('dp-' + id);
-  if (panel) panel.classList.toggle('open');
+function deliberateCustomDate(id,val){
+  if(!val)return;
+  if(!deliberateSel[id])deliberateSel[id]={};
+  deliberateSel[id].date=val;
+  commitDeliberate(id);
 }
 
-var deliberateDates = {};
-function pickDate(id, type) {
-  var chips = document.querySelectorAll('#dp-' + id + ' .date-chip');
-  chips.forEach(function(c) { c.classList.remove('sel'); });
-  var customInp = document.getElementById('customdate-' + id);
-  var confirmBtn = document.getElementById('dconfirm-' + id);
-
-  if (type === 'tomorrow') {
-    deliberateDates[id] = addDays(1);
-    chips[0].classList.add('sel');
-    if (customInp) customInp.style.display = 'none';
-    if (confirmBtn) confirmBtn.style.display = 'inline-flex';
-  } else if (type === 'nextweek') {
-    deliberateDates[id] = addDays(7);
-    chips[1].classList.add('sel');
-    if (customInp) customInp.style.display = 'none';
-    if (confirmBtn) confirmBtn.style.display = 'inline-flex';
-  } else if (type === 'custom') {
-    chips[2].classList.add('sel');
-    if (customInp) {
-      customInp.style.display = 'block';
-      customInp.onchange = function() {
-        deliberateDates[id] = customInp.value;
-        if (confirmBtn) confirmBtn.style.display = 'inline-flex';
-      };
-    }
-  }
+async function commitDeliberate(id){
+  var sel=deliberateSel[id]||{};
+  if(!sel.date)return;
+  decisions[id]={action:'deliberate',date:sel.date,projectId:sel.projectId||null};
+  try{
+    await setDue(id,sel.date);
+    var task=taskRegistry[id];
+    var labels=task?(task.labels||[]).filter(function(l){return l!=='thisweek'&&l!=='waiting';}).concat(['deliberate']):['deliberate'];
+    await setLabels(id,labels);
+    if(sel.projectId)await moveTask(id,sel.projectId);
+  }catch(e){}
+  var panel=document.getElementById('dp-'+id);if(panel)panel.classList.remove('open');
+  showDecide();
 }
 
-async function confirmDeliberate(id) {
-  var date = deliberateDates[id];
-  if (!date) return;
-  decideDecisions[id] = { action: 'deliberate', date: date };
-  // Apply to Todoist: set due date + add deliberate label
-  try {
-    await setDue(id, date);
-    var task = decideAllItems.find(function(t) { return t.id === id; });
-    var labels = task ? (task.labels || []).filter(function(l) { return l !== 'thisweek' && l !== 'waiting'; }) : [];
-    if (!labels.includes('deliberate')) labels.push('deliberate');
-    await setLabels(id, labels);
-  } catch(e) {}
-  var el = document.getElementById('di-' + id);
-  if (el) { el.classList.add('decided'); setTimeout(function() { if (el.parentNode) el.remove(); showDecideItems(); }, 300); }
-}
+function showSummary(){
+  var el=document.getElementById('decide-body');if(!el)return;
+  var groups={do:[],file:[],deliberate:[],dump:[]};
+  allItems.forEach(function(t){var d=decisions[t.id];if(d&&groups[d.action])groups[d.action].push(t);});
+  var html='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem">All decisions made. Review below.</div>';
+  var labels={do:'Do it',file:'Filed',deliberate:'Deliberate',dump:'Dump it'};
+  var clsMap={do:'do-it',file:'filed',deliberate:'deliberated',dump:'dumped'};
+  ['do','file','deliberate','dump'].forEach(function(action){
+    var items=groups[action];if(!items.length)return;
+    html+='<div class="section-head">'+labels[action]+' <span class="section-count">'+items.length+'</span></div>';
+    html+=items.map(function(t){
+      var d=decisions[t.id],extra='';
+      if(action==='deliberate'&&d.date)extra=' &middot; '+d.date;
+      if(action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=' &middot; '+p.name;}
+      return '<div class="task-row '+clsMap[action]+'"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta">'+extra+(action!=='dump'?'<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-left:8px;font-family:inherit;text-decoration:underline">change</button>':'')+'</div></div></div>';
+    }).join('');
+  });
 
-async function decide(id, action) {
-  decideDecisions[id] = { action: action };
-  if (action === 'dump') {
-    try { await delTask(id); } catch(e) {}
-  }
-  var el = document.getElementById('di-' + id);
-  if (el) { el.classList.add('decided'); setTimeout(function() { if (el.parentNode) el.remove(); showDecideItems(); }, 300); }
-}
-
-function skipRemaining() {
-  var pending = decideAllItems.filter(function(t) { return !decideDecisions[t.id]; });
-  pending.forEach(function(t) { decideDecisions[t.id] = { action: 'skip' }; });
-  showDecideSummary();
-}
-
-function showDecideSummary() {
-  decideSummaryShown = true;
-  var doItems = decideAllItems.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'do'; });
-  var delItems = decideAllItems.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'deliberate'; });
-  var dumpItems = decideAllItems.filter(function(t) { return decideDecisions[t.id] && decideDecisions[t.id].action === 'dump'; });
-
-  state.doItItems = doItems;
-
-  var el = document.getElementById('decide-body'); if (!el) return;
-
-  var html = '';
-
-  if (doItems.length) {
-    html += '<div class="section-head">Do it <span class="section-count">' + doItems.length + ' items</span></div>';
-    html += doItems.map(function(t) {
-      return '<div class="task-row p' + (t.priority || 4) + '"><div class="task-info"><div class="task-name">' + esc(t.content) + '</div><div class="task-meta">' + pLabel(t.priority || 4) + '</div></div></div>';
+  var doItems=groups.do;
+  if(doItems.length){
+    html+='<hr><div style="font-family:\'Playfair Display\',serif;font-size:17px;margin-bottom:.4rem">Refine: Do it now, schedule, or delegate?</div>';
+    html+='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Decide exactly how each Do It item happens.</div>';
+    html+=doItems.map(function(t){
+      return '<div class="task-row p'+(t.priority||4)+'" id="ri-'+t.id+'">'+
+        '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
+        '<div class="task-meta">'+pLabel(t.priority||4)+'</div>'+
+        '<div class="task-actions">'+
+        '<button class="btn btn-do" data-action="refine-now" data-id="'+t.id+'" onclick="handleClick(this)">&#9889; Do it now</button>'+
+        '<button class="btn btn-think" data-action="open-sched" data-id="'+t.id+'" onclick="handleClick(this)">&#128197; Schedule</button>'+
+        '<button class="btn" data-action="refine-delegate" data-id="'+t.id+'" onclick="handleClick(this)">&#128101; Delegate</button>'+
+        '<button class="btn btn-del" data-action="refine-dump" data-id="'+t.id+'" onclick="handleClick(this)">&#215; Dump</button>'+
+        '</div>'+
+        '<div class="sub-panel" id="sp-'+t.id+'">'+
+        '<div class="sub-label">Schedule for...</div>'+
+        '<div class="date-opts">'+
+        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
+        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
+        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
+        '</div>'+
+        '<div id="sdate-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="schedCustom(\''+t.id+'\',this.value)" /></div>'+
+        '</div></div></div>';
     }).join('');
   }
-  if (delItems.length) {
-    html += '<div class="section-head">Deliberate <span class="section-count">' + delItems.length + ' items</span></div>';
-    html += delItems.map(function(t) {
-      var d = decideDecisions[t.id];
-      return '<div class="task-row p' + (t.priority || 4) + '"><div class="task-info"><div class="task-name">' + esc(t.content) + '</div><div class="task-meta">Resurfaces ' + (d.date || '') + '</div></div></div>';
-    }).join('');
-  }
-  if (dumpItems.length) {
-    html += '<div class="section-head">Dump it <span class="section-count">' + dumpItems.length + ' items</span></div>';
-    html += dumpItems.map(function(t) {
-      return '<div class="task-row" style="opacity:.4"><div class="task-info"><div class="task-name">' + esc(t.content) + '</div></div></div>';
-    }).join('');
-  }
-
-  if (!doItems.length && !delItems.length && !dumpItems.length) {
-    html = '<div class="empty-note">No decisions made.</div>';
-  }
-
-  html += '<hr class="rule-line"><div style="font-size:13px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Now refine your Do It list below.</div>';
-  el.innerHTML = html + '<div class="btn-row"><button class="btn btn-primary" onclick="goToRefine()">Refine Do It list &#8594;</button></div>';
+  html+='<div class="btn-row"><button class="btn btn-primary" onclick="finishDecide()">Done &#8212; move to recurring</button></div>';
+  el.innerHTML=html;
+  finalItems=[];
 }
 
-function goToRefine() {
-  var el = document.getElementById('decide-body'); if (!el) return;
-  if (!state.doItItems.length) {
-    // nothing to refine, move on
-    state.finalItems = [];
-    next();
-    return;
-  }
-  showRefineItems();
+function schedCustom(id,val){if(!val)return;applyRefine(id,'schedule',val);}
+
+async function applyRefine(id,action,date){
+  refineDecisions[id]={action:action,date:date};
+  try{
+    if(action==='now')await setDue(id,iso());
+    else if(action==='schedule'&&date)await setDue(id,date);
+    else if(action==='dump'){await delTask(id);}
+  }catch(e){}
+  var el=document.getElementById('ri-'+id);if(el){el.style.opacity='.4';el.style.pointerEvents='none';}
+  var sp=document.getElementById('sp-'+id);if(sp)sp.classList.remove('open');
 }
 
-var refineDecisions = {};
-function showRefineItems() {
-  var el = document.getElementById('decide-body'); if (!el) return;
-  refineDecisions = {};
-  var items = state.doItItems;
-
-  el.innerHTML = '<div style="margin-bottom:.75rem"><div style="font-family:\'Playfair Display\',serif;font-size:18px;margin-bottom:.4rem">Refine: Do it now, delegate, or schedule?</div>' +
-    '<div style="font-size:13px;color:var(--dim);font-weight:300">For each item you said Do It &#8212; nail down exactly how it happens.</div></div>' +
-    items.map(function(t) {
-      return '<div class="task-row p' + (t.priority || 4) + '" id="ri-' + t.id + '">' +
-        '<div class="task-info">' +
-        '<div class="task-name">' + esc(t.content) + '</div>' +
-        '<div class="task-meta">' + pLabel(t.priority || 4) + '</div>' +
-        '<div class="task-actions">' +
-        '<button class="btn btn-do" onclick="refine(\'' + t.id + '\',\'now\')">&#9889; Do it now</button>' +
-        '<button class="btn btn-think" onclick="refine(\'' + t.id + '\',\'delegate\')">&#128101; Delegate</button>' +
-        '<button class="btn" onclick="openSchedule(\'' + t.id + '\')">&#128197; Schedule</button>' +
-        '<button class="btn btn-del" onclick="refine(\'' + t.id + '\',\'dump\')">&#215; Dump</button>' +
-        '</div>' +
-        '<div class="deliberate-panel" id="sp-' + t.id + '">' +
-        '<div class="deliberate-label">Schedule for...</div>' +
-        '<div class="date-opts">' +
-        '<button class="date-chip" onclick="pickSched(\'' + t.id + '\',\'today\')">Today</button>' +
-        '<button class="date-chip" onclick="pickSched(\'' + t.id + '\',\'tomorrow\')">Tomorrow</button>' +
-        '<button class="date-chip" onclick="pickSched(\'' + t.id + '\',\'custom\')">Pick date</button>' +
-        '</div>' +
-        '<input type="date" id="sdate-' + t.id + '" style="display:none;margin-top:6px" />' +
-        '<div class="date-confirm"><button class="btn" id="sconfirm-' + t.id + '" style="display:none" onclick="confirmSched(\'' + t.id + '\')">Confirm</button></div>' +
-        '</div>' +
-        '</div></div>';
-    }).join('') +
-    '<div class="btn-row"><button class="btn btn-primary" onclick="finishRefine()">Done &#8212; move to recurring</button></div>';
-}
-
-function openSchedule(id) {
-  var p = document.getElementById('sp-' + id);
-  if (p) p.classList.toggle('open');
-}
-
-var schedDates = {};
-function pickSched(id, type) {
-  var chips = document.querySelectorAll('#sp-' + id + ' .date-chip');
-  chips.forEach(function(c) { c.classList.remove('sel'); });
-  var inp = document.getElementById('sdate-' + id);
-  var btn = document.getElementById('sconfirm-' + id);
-  if (type === 'today') { schedDates[id] = iso(); chips[0].classList.add('sel'); if (inp) inp.style.display = 'none'; if (btn) btn.style.display = 'inline-flex'; }
-  else if (type === 'tomorrow') { schedDates[id] = addDays(1); chips[1].classList.add('sel'); if (inp) inp.style.display = 'none'; if (btn) btn.style.display = 'inline-flex'; }
-  else if (type === 'custom') {
-    chips[2].classList.add('sel');
-    if (inp) { inp.style.display = 'block'; inp.onchange = function() { schedDates[id] = inp.value; if (btn) btn.style.display = 'inline-flex'; }; }
-  }
-}
-
-async function confirmSched(id) {
-  var date = schedDates[id]; if (!date) return;
-  refineDecisions[id] = { action: 'schedule', date: date };
-  try { await setDue(id, date); } catch(e) {}
-  var el = document.getElementById('ri-' + id);
-  if (el) { el.classList.add('decided'); }
-}
-
-async function refine(id, action) {
-  refineDecisions[id] = { action: action };
-  if (action === 'now') {
-    try { await setDue(id, iso()); } catch(e) {}
-  } else if (action === 'dump') {
-    try { await delTask(id); } catch(e) {}
-  }
-  var el = document.getElementById('ri-' + id);
-  if (el) { el.classList.add('decided'); }
-}
-
-async function finishRefine() {
-  // collect final items
-  state.finalItems = state.doItItems.filter(function(t) {
-    var d = refineDecisions[t.id];
-    return d && (d.action === 'now' || d.action === 'schedule');
-  });
-  state.delegateItems = state.doItItems.filter(function(t) {
-    var d = refineDecisions[t.id];
-    return d && d.action === 'delegate';
-  });
-  // items not decided = treat as do it now
-  state.doItItems.forEach(function(t) {
-    if (!refineDecisions[t.id]) {
-      refineDecisions[t.id] = { action: 'now' };
-      state.finalItems.push(t);
-    }
-  });
+function finishDecide(){
+  var doItems=allItems.filter(function(t){return decisions[t.id]&&decisions[t.id].action==='do';});
+  finalItems=doItems.filter(function(t){var r=refineDecisions[t.id];if(!r)return true;return r.action==='now'||r.action==='schedule';});
   next();
 }
 
-// ── STEP 4: RECURRING ────────────────────────────────────
-function rRecurring(m) {
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 4 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Recurring tasks</div>' +
-    '<div class="card-body">These repeat on a schedule. For each one &#8212; do it today, skip just this once, or remove it entirely.</div>' +
-    '<div id="rec-body"><div class="loading"><div class="spin"></div>Pulling recurring tasks...</div></div></div>';
+// RECURRING
+function rRecurring(m){
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 4 of '+(STEPS.length-1)+'</div><div class="card-title">Recurring tasks</div><div class="card-body">These repeat on a schedule. Do it today, skip just this once, or remove entirely.</div><div id="rec-body"><div class="loading"><div class="spin"></div>Pulling recurring tasks...</div></div></div>';
   loadRecurring();
 }
-async function loadRecurring() {
-  try {
-    var tasks = await getRecurring();
-    state.recurringItems = tasks;
-    showRecurring(tasks);
-  } catch(e) {
-    document.getElementById('rec-body').innerHTML = '<div class="empty-note">Could not load.</div><button class="btn btn-primary" onclick="next()">Skip</button>';
-  }
-}
-var recurDone = new Set();
-function showRecurring(tasks) {
-  var el = document.getElementById('rec-body'); if (!el) return;
-  var rem = tasks.filter(function(t) { return !recurDone.has(t.id); });
-  if (!rem.length) {
-    el.innerHTML = '<div class="empty-note">No recurring tasks due today.</div><div class="btn-row"><button class="btn btn-primary" onclick="next()">Next</button></div>';
-    return;
-  }
-  el.innerHTML = rem.map(function(t) {
-    return '<div class="task-row p' + (t.priority || 4) + '" id="rec-' + t.id + '">' +
-      '<div class="task-info">' +
-      '<div class="task-name">' + esc(t.content) + '</div>' +
-      '<div class="task-meta"><span class="tag recurring">Recurring</span> &middot; ' + pLabel(t.priority || 4) + '</div>' +
-      '<div class="task-actions">' +
-      '<button class="btn btn-do" onclick="doRecur(\'' + t.id + '\',\'do\')">&#10003; Do it today</button>' +
-      '<button class="btn" onclick="doRecur(\'' + t.id + '\',\'skip\')">Skip today</button>' +
-      '<button class="btn btn-del" onclick="doRecur(\'' + t.id + '\',\'remove\')">Remove</button>' +
+async function loadRecurring(){try{var t=await getRecurring();showRecurring(t);}catch(e){document.getElementById('rec-body').innerHTML='<div class="empty-note">Could not load.</div><button class="btn btn-primary" onclick="next()">Next</button>';}}
+function showRecurring(tasks){
+  var el=document.getElementById('rec-body');if(!el)return;
+  var rem=tasks.filter(function(t){return !recurDone.has(t.id)&&!deletedIds.has(t.id);});
+  if(!rem.length){el.innerHTML='<div class="empty-note">No recurring tasks due today.</div><div class="btn-row"><button class="btn btn-primary" onclick="next()">Next</button></div>';return;}
+  el.innerHTML=sortP(rem).map(function(t){
+    return '<div class="task-row p'+(t.priority||4)+'" id="rec-'+t.id+'">'+
+      '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
+      '<div class="task-meta"><span class="tag recurring">Recurring</span> &middot; '+pLabel(t.priority||4)+'</div>'+
+      '<div class="task-actions">'+
+      '<button class="btn btn-do" data-action="recur-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it today</button>'+
+      '<button class="btn" data-action="recur-skip" data-id="'+t.id+'" onclick="handleClick(this)">Skip today</button>'+
+      '<button class="btn btn-del" data-action="recur-remove" data-id="'+t.id+'" onclick="handleClick(this)">Remove</button>'+
       '</div></div></div>';
-  }).join('') +
-  '<div class="btn-row"><button class="btn btn-primary" onclick="next()">Done &#8212; prioritize</button></div>';
-}
-async function doRecur(id, action) {
-  var el = document.getElementById('rec-' + id);
-  if (el) { el.classList.add('decided'); }
-  recurDone.add(id);
-  try {
-    if (action === 'do') {
-      await setDue(id, iso());
-      // add to today's committed
-      var task = state.recurringItems.find(function(t) { return t.id === id; });
-      if (task) state.finalItems.push(task);
-    } else if (action === 'remove') {
-      await delTask(id);
-    }
-    // skip = do nothing, recurrence stays intact
-  } catch(e) {}
-  setTimeout(function() { if (el && el.parentNode) el.remove(); }, 300);
+  }).join('')+'<div class="btn-row"><button class="btn btn-primary" onclick="next()">Done &#8212; prioritize</button></div>';
 }
 
-// ── STEP 5: PRIORITIZE ───────────────────────────────────
-function rPrioritize(m) {
-  // build full today list from finalItems + already scheduled today tasks
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 5 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Prioritize</div>' +
-    '<div class="card-body">Everything you\'re doing today. Tap to rank them. Pick your top 3&#8211;5 as your focus &#8212; everything else is secondary.</div>' +
-    '<div id="pri-body"><div class="loading"><div class="spin"></div>Building today\'s list...</div></div></div>';
+// PRIORITIZE
+function rPrioritize(m){
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 5 of '+(STEPS.length-1)+'</div><div class="card-title">Prioritize</div><div class="card-body">Everything you\'re doing today. Tap to mark focus items. Use P dropdowns to re-rank.</div><div id="pri-body"><div class="loading"><div class="spin"></div>Building today\'s list...</div></div></div>';
   loadPrioritize();
 }
-async function loadPrioritize() {
-  try {
-    var todayTasks = await getToday();
-    // merge with finalItems, dedupe
-    var seen = new Set();
-    var all = [];
-    state.finalItems.forEach(function(t) { if (!seen.has(t.id)) { seen.add(t.id); all.push(t); } });
-    todayTasks.forEach(function(t) { if (!seen.has(t.id)) { seen.add(t.id); all.push(t); } });
-    all = sortP(all);
-    state.todayCommitted = all;
-    state.ranked = [];
-    showPrioritize(all);
-  } catch(e) {
-    document.getElementById('pri-body').innerHTML = '<div class="empty-note">Could not load.</div><button class="btn btn-primary" onclick="next()">Skip</button>';
-  }
+async function loadPrioritize(){
+  try{
+    var today=await getToday();
+    var seen=new Set(),all=[];
+    finalItems.forEach(function(t){if(!seen.has(t.id)&&!deletedIds.has(t.id)){seen.add(t.id);all.push(t);}});
+    recurAdded.forEach(function(t){if(!seen.has(t.id)&&!deletedIds.has(t.id)){seen.add(t.id);all.push(t);}});
+    today.forEach(function(t){if(!seen.has(t.id)&&!deletedIds.has(t.id)){seen.add(t.id);all.push(t);}});
+    todayCommitted=sortP(all);ranked=[];sortMode='priority';
+    showPrioritize();
+  }catch(e){document.getElementById('pri-body').innerHTML='<div class="empty-note">Could not load.</div><button class="btn btn-primary" onclick="next()">Skip</button>';}
 }
-function showPrioritize(items) {
-  var el = document.getElementById('pri-body'); if (!el) return;
-  if (!items.length) {
-    el.innerHTML = '<div class="empty-note">Nothing committed to today yet.</div><div class="btn-row"><button class="btn btn-primary" onclick="next()">Next</button></div>';
+function showPrioritize(){
+  var el=document.getElementById('pri-body');if(!el)return;
+  if(!todayCommitted.length){el.innerHTML='<div class="empty-note">Nothing committed to today yet.</div><div class="btn-row"><button class="btn btn-primary" onclick="next()">Next</button></div>';return;}
+  var sorted=todayCommitted.slice();
+  if(sortMode==='focus')sorted.sort(function(a,b){var ai=ranked.findIndex(function(r){return r.id===a.id;}),bi=ranked.findIndex(function(r){return r.id===b.id;});if(ai>-1&&bi>-1)return ai-bi;if(ai>-1)return -1;if(bi>-1)return 1;return(a.priority||4)-(b.priority||4);});
+  else sorted=sortP(sorted);
+  el.innerHTML='<div class="sort-bar"><span style="font-size:11px;color:var(--dim);font-weight:300">Sort:</span><button class="sort-btn'+(sortMode==='priority'?' active':'')+'" onclick="setSort(\'priority\')">Priority</button><button class="sort-btn'+(sortMode==='focus'?' active':'')+'" onclick="setSort(\'focus\')">Focus first</button></div>'+
+    '<div style="font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.75rem">'+ranked.length+' focus item'+(ranked.length!==1?'s':'')+' (tap to toggle)</div>'+
+    sorted.map(function(t){
+      var ri=ranked.findIndex(function(r){return r.id===t.id;}),isFocus=ri>-1;
+      return '<div class="rank-item p'+(t.priority||4)+(isFocus?' focused':'')+'" data-action="toggle-rank" data-id="'+t.id+'" onclick="handleClick(this)">'+
+        '<div class="rank-num">'+(isFocus?(ri+1):'&middot;')+'</div>'+
+        '<div style="flex:1"><div style="font-size:13px;line-height:1.4">'+esc(t.content)+'</div></div>'+
+        '<select class="p-select" data-action="change-p" data-id="'+t.id+'" onclick="event.stopPropagation()" onchange="handlePChange(this)">'+
+        '<option value="1"'+(t.priority===1?' selected':'')+'>P1</option>'+
+        '<option value="2"'+(t.priority===2?' selected':'')+'>P2</option>'+
+        '<option value="3"'+(t.priority===3?' selected':'')+'>P3</option>'+
+        '<option value="4"'+((!t.priority||t.priority===4)?' selected':'')+'>P4</option>'+
+        '</select></div>';
+    }).join('')+
+    '<div class="btn-row"><button class="btn btn-primary" onclick="next()">Ranking set &#8212; next</button></div>';
+}
+function setSort(m){sortMode=m;showPrioritize();}
+function handlePChange(sel){var id=sel.getAttribute('data-id'),p=parseInt(sel.value);var t=todayCommitted.find(function(x){return x.id===id;});if(t)t.priority=p;try{setPriority(id,p);}catch(e){}showPrioritize();}
+
+// INTENTION
+function rIntention(m){
+  var focused=ranked.slice(0,5);
+  var fhtml=focused.length?'<div style="margin-bottom:1.25rem">'+focused.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 6 of '+(STEPS.length-1)+'</div><div class="card-title">Set your intention</div><div class="card-body">Optional. Today is a win if...</div>'+fhtml+'<input type="text" id="iin" placeholder="Today is a win if..." style="margin-bottom:1rem" /><div class="btn-row"><button class="btn btn-primary" id="ibtn" onclick="subIntent()">Lock it in</button><button class="btn-skip" onclick="next()">Skip intention</button></div><div id="iout"></div></div>';
+  setTimeout(function(){var i=document.getElementById('iin');if(i)i.focus();},100);
+}
+async function subIntent(){var val=document.getElementById('iin').value.trim();if(!val){next();return;}intention='Today is a win if '+val;var b=document.getElementById('ibtn');b.disabled=true;b.textContent='Saving...';try{await addTask("Today's intention",intention,PR.daily,1,iso());next();}catch(e){document.getElementById('iout').innerHTML='<div style="font-size:12px;color:var(--acc);margin-top:.5rem">Could not save.</div>';setTimeout(next,1500);}}
+
+// DONE
+function rDone(m){
+  var ihtml=intention?'<div class="card"><div class="card-eyebrow">Win condition</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;line-height:1.4;font-style:italic">'+esc(intention)+'</div></div>':'';
+  var fhtml=ranked.length?'<div class="card"><div class="card-eyebrow">Top priorities</div>'+ranked.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  var rest=todayCommitted.filter(function(t){return !ranked.find(function(r){return r.id===t.id;})&&!deletedIds.has(t.id);});
+  var rhtml=rest.length?'<div class="card"><div class="card-eyebrow">Also today</div>'+rest.map(function(t,i){return '<div class="done-row"><span class="done-n">'+(ranked.length+i+1)+'</span><span style="font-size:13px;line-height:1.4;color:var(--dim)">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  m.innerHTML='<div style="text-align:center;padding:1.5rem 0 1rem"><div style="font-size:40px;margin-bottom:.75rem">&#127749;</div><div style="font-family:\'Playfair Display\',serif;font-size:26px;letter-spacing:-.5px;margin-bottom:.25rem">You\'re set.</div><div style="font-size:13px;color:var(--dim);font-weight:300">Morning ritual complete. Go build.</div></div>'+ihtml+fhtml+rhtml+'<div class="btn-row" style="margin-top:.5rem"><button class="btn" onclick="resetAll()">&#8635; Start over</button></div>';
+}
+
+// CENTRAL CLICK HANDLER - no inline IDs in onclick
+async function handleClick(el){
+  var action=el.getAttribute('data-action'),id=el.getAttribute('data-id');
+  if(action==='removebrain'){removeBL(parseInt(el.getAttribute('data-idx')));return;}
+  if(action==='undecide'){delete decisions[id];decidePhase='deciding';showDecide();return;}
+  if(action==='decide-do'){decisions[id]={action:'do'};try{await setDue(id,iso());}catch(e){}showDecide();return;}
+  if(action==='decide-dump'){decisions[id]={action:'dump'};try{await delTask(id);}catch(e){}showDecide();return;}
+  if(action==='open-file'){var fp=document.getElementById('fp-'+id),dp=document.getElementById('dp-'+id);if(dp)dp.classList.remove('open');if(fp)fp.classList.toggle('open');return;}
+  if(action==='open-delib'){var dp2=document.getElementById('dp-'+id),fp2=document.getElementById('fp-'+id);if(fp2)fp2.classList.remove('open');if(dp2)dp2.classList.toggle('open');return;}
+  if(action==='file-proj'){var pid=el.getAttribute('data-proj');decisions[id]={action:'file',projectId:pid};try{await moveTask(id,pid);}catch(e){}var fp3=document.getElementById('fp-'+id);if(fp3)fp3.classList.remove('open');showDecide();return;}
+  if(action==='delib-date'){
+    var when=el.getAttribute('data-when');
+    if(!deliberateSel[id])deliberateSel[id]={};
+    var chips=el.parentNode.querySelectorAll('.date-chip');chips.forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');
+    if(when==='tomorrow'){deliberateSel[id].date=addDays(1);commitDeliberate(id);}
+    else if(when==='nextweek'){deliberateSel[id].date=addDays(7);commitDeliberate(id);}
+    else if(when==='custom'){var cw=document.getElementById('delib-custom-'+id);if(cw)cw.style.display='block';}
     return;
   }
-  var focusCount = state.ranked.length;
-  el.innerHTML = '<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Tap items to rank them. First tap = #1 focus. Tap again to unrank.</div>' +
-    '<div style="font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.75rem">' + focusCount + ' of 3&#8211;5 selected as focus</div>' +
-    items.map(function(t) {
-      var rankIdx = state.ranked.findIndex(function(r) { return r.id === t.id; });
-      var isFocus = rankIdx > -1;
-      var rankNum = isFocus ? (rankIdx + 1) : '';
-      return '<div class="rank-item ' + (isFocus ? 'focus' : '') + '" id="rank-' + t.id + '" onclick="toggleRank(\'' + t.id + '\')">' +
-        '<div class="rank-num">' + (rankNum || '&middot;') + '</div>' +
-        '<div style="flex:1">' +
-        '<div style="font-size:14px;line-height:1.4">' + esc(t.content) + '</div>' +
-        '<div class="rank-label">' + pLabel(t.priority || 4) + '</div>' +
-        '</div></div>';
-    }).join('') +
-    '<div class="btn-row" style="margin-top:1rem"><button class="btn btn-primary" onclick="next()">Ranking set &#8212; set intention</button></div>';
-}
-
-function toggleRank(id) {
-  var task = state.todayCommitted.find(function(t) { return t.id === id; });
-  if (!task) return;
-  var idx = state.ranked.findIndex(function(r) { return r.id === id; });
-  if (idx > -1) {
-    state.ranked.splice(idx, 1);
-  } else {
-    state.ranked.push(task);
+  if(action==='delib-proj'){var proj=el.getAttribute('data-proj');if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].projectId=deliberateSel[id].projectId===proj?null:proj;var siblings=el.parentNode.querySelectorAll('.proj-chip');siblings.forEach(function(s){s.classList.remove('sel');});if(deliberateSel[id].projectId)el.classList.add('sel');return;}
+  if(action==='skip-remaining'){allItems.forEach(function(t){if(!decisions[t.id])decisions[t.id]={action:'skip'};});decidePhase='summary';showSummary();return;}
+  if(action==='refine-now'){applyRefine(id,'now',null);return;}
+  if(action==='refine-delegate'){refineDecisions[id]={action:'delegate'};var ri=document.getElementById('ri-'+id);if(ri){ri.style.opacity='.4';ri.style.pointerEvents='none';}return;}
+  if(action==='refine-dump'){refineDecisions[id]={action:'dump'};try{await delTask(id);}catch(e){}var ri2=document.getElementById('ri-'+id);if(ri2){ri2.style.opacity='.4';ri2.style.pointerEvents='none';}return;}
+  if(action==='open-sched'){var sp=document.getElementById('sp-'+id);if(sp)sp.classList.toggle('open');return;}
+  if(action==='sched-pick'){
+    var when2=el.getAttribute('data-when');
+    var chips2=el.parentNode.querySelectorAll('.date-chip');chips2.forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');
+    if(when2==='tomorrow'){applyRefine(id,'schedule',addDays(1));}
+    else if(when2==='nextweek'){applyRefine(id,'schedule',addDays(7));}
+    else if(when2==='custom'){var sw=document.getElementById('sdate-'+id);if(sw)sw.style.display='block';}
+    return;
   }
-  showPrioritize(state.todayCommitted);
+  if(action==='recur-do'){recurDone.add(id);try{await setDue(id,iso());var t2=taskRegistry[id];if(t2)recurAdded.push(t2);}catch(e){}var re=document.getElementById('rec-'+id);if(re){re.style.opacity='.3';setTimeout(function(){if(re.parentNode)re.remove();},300);}return;}
+  if(action==='recur-skip'){recurDone.add(id);var re2=document.getElementById('rec-'+id);if(re2){re2.style.opacity='.3';setTimeout(function(){if(re2.parentNode)re2.remove();},300);}return;}
+  if(action==='recur-remove'){recurDone.add(id);try{await delTask(id);}catch(e){}var re3=document.getElementById('rec-'+id);if(re3){re3.style.opacity='.3';setTimeout(function(){if(re3.parentNode)re3.remove();},300);}return;}
+  if(action==='toggle-rank'){var t3=todayCommitted.find(function(x){return x.id===id;});if(!t3)return;var ri3=ranked.findIndex(function(r){return r.id===id;});if(ri3>-1)ranked.splice(ri3,1);else ranked.push(t3);showPrioritize();return;}
 }
 
-// ── STEP 6: INTENTION ────────────────────────────────────
-function rIntention(m) {
-  var focused = state.ranked.slice(0, 5);
-  var focusHtml = focused.length ? '<div style="margin-bottom:1.25rem">' +
-    focused.map(function(t, i) {
-      return '<div class="done-rank"><span class="done-n focus">' + (i + 1) + '</span><span style="font-size:14px;line-height:1.4">' + esc(t.content) + '</span></div>';
-    }).join('') + '</div>' : '';
-
-  m.innerHTML = '<div class="card">' + bbtn() +
-    '<div class="card-eyebrow">Step 6 of ' + (STEPS.length - 1) + '</div>' +
-    '<div class="card-title">Set your intention</div>' +
-    '<div class="card-body">Optional. Based on your top priorities, complete this: <em>Today is a win if...</em></div>' +
-    focusHtml +
-    '<input type="text" id="iin" placeholder="Today is a win if..." style="margin-bottom:1rem" />' +
-    '<div class="btn-row">' +
-    '<button class="btn btn-primary" id="ibtn" onclick="subIntent()">Lock it in</button>' +
-    '<button class="btn-skip" onclick="next()">Skip intention</button>' +
-    '</div><div id="iout"></div></div>';
-  setTimeout(function() { var i = document.getElementById('iin'); if (i) i.focus(); }, 100);
-}
-async function subIntent() {
-  var val = document.getElementById('iin').value.trim();
-  if (!val) { next(); return; }
-  state.intention = 'Today is a win if ' + val;
-  var btn = document.getElementById('ibtn'); btn.disabled = true; btn.textContent = 'Saving...';
-  try { await addTask("Today's intention", state.intention, PR.daily, 1, iso()); next(); }
-  catch(e) { document.getElementById('iout').innerHTML = '<div style="font-size:12px;color:var(--acc);margin-top:.5rem">Could not save to Todoist.</div>'; setTimeout(next, 1500); }
-}
-
-// ── STEP 7: DONE ─────────────────────────────────────────
-function rDone(m) {
-  var intentHtml = state.intention ?
-    '<div class="card"><div class="card-eyebrow">Win condition</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;line-height:1.4;font-style:italic">' + esc(state.intention) + '</div></div>' : '';
-
-  var focusHtml = '';
-  if (state.ranked.length) {
-    focusHtml = '<div class="card"><div class="card-eyebrow">Top priorities</div>' +
-      state.ranked.map(function(t, i) {
-        return '<div class="done-rank"><span class="done-n focus">' + (i + 1) + '</span><span style="font-size:14px;line-height:1.4">' + esc(t.content) + '</span></div>';
-      }).join('') + '</div>';
-  }
-
-  var restItems = state.todayCommitted.filter(function(t) {
-    return !state.ranked.find(function(r) { return r.id === t.id; });
-  });
-  var restHtml = '';
-  if (restItems.length) {
-    restHtml = '<div class="card"><div class="card-eyebrow">Also today</div>' +
-      restItems.map(function(t, i) {
-        return '<div class="done-rank"><span class="done-n">' + (state.ranked.length + i + 1) + '</span><span style="font-size:14px;line-height:1.4;color:var(--dim)">' + esc(t.content) + '</span></div>';
-      }).join('') + '</div>';
-  }
-
-  var delegateHtml = '';
-  if (state.delegateItems && state.delegateItems.length) {
-    delegateHtml = '<div class="card"><div class="card-eyebrow">To delegate</div>' +
-      state.delegateItems.map(function(t) {
-        return '<div class="done-rank"><span class="done-n">&#8594;</span><span style="font-size:14px;line-height:1.4;color:var(--dim)">' + esc(t.content) + '</span></div>';
-      }).join('') + '</div>';
-  }
-
-  m.innerHTML = '<div style="text-align:center;padding:1.5rem 0 1rem">' +
-    '<div style="font-size:40px;margin-bottom:.75rem">&#127749;</div>' +
-    '<div style="font-family:\'Playfair Display\',serif;font-size:26px;letter-spacing:-.5px;margin-bottom:.25rem">You\'re set.</div>' +
-    '<div style="font-size:13px;color:var(--dim);font-weight:300">Morning ritual complete. Go build.</div></div>' +
-    intentHtml + focusHtml + restHtml + delegateHtml +
-    '<div class="btn-row" style="margin-top:.5rem"><button class="btn" onclick="resetAll()">&#8635; Start over</button></div>';
-}
-
-function resetAll() {
-  cur = 0;
-  state = { brainLines: [], decideItems: [], doItItems: [], finalItems: [], delegateItems: [], scheduleItems: [], recurringItems: [], todayCommitted: [], ranked: [], intention: '' };
-  ibDone = new Set();
-  recurDone = new Set();
-  decideAllItems = [];
-  decideDecisions = {};
-  refineDecisions = {};
-  deliberateDates = {};
-  schedDates = {};
-  decideSummaryShown = false;
+function resetAll(){
+  cur=0;brainLines=[];allItems=[];decisions={};deletedIds=new Set();recurDone=new Set();recurAdded=[];finalItems=[];todayCommitted=[];ranked=[];intention='';sortMode='priority';refineDecisions={};deliberateSel={};decidePhase='deciding';taskRegistry={};
   render();
 }
 
-// Init
-document.getElementById('dateline').textContent = dstr();
+document.getElementById('dateline').textContent=dstr();
 render();
 </script>
 </body>
