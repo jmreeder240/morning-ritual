@@ -110,6 +110,14 @@ select{cursor:pointer}
 .sort-btn{padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--rule);background:var(--paper);color:var(--dim);font-family:inherit;font-weight:500;transition:all .15s}
 .sort-btn.active,.sort-btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 hr{border:none;border-top:1px solid var(--rule);margin:.75rem 0}
+
+.task-desc{font-size:12px;color:var(--dim);line-height:1.5;margin-top:3px;font-weight:300;font-style:italic;word-break:break-word;overflow-wrap:anywhere}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#F0EDE6;--paper:#1A1814;--card:#231F1A;--rule:#3A3530;--dim:#7A756E;--acc:#E06040;--acc-soft:#3A2520;--gold:#D4A840;--gold-soft:#352A18;--green:#3A9A60;--green-soft:#1A3025;--blue:#4A7CB0;--blue-soft:#1A2535;--sh:0 2px 8px rgba(0,0,0,.3),0 0 0 1px rgba(0,0,0,.2)}
+  input,select{background:var(--card);color:var(--ink)}
+  .date-chip,.sort-btn{background:var(--card)}
+  .proj-chip{background:var(--blue-soft)}
+}
 </style>
 </head>
 <body>
@@ -133,21 +141,22 @@ const GOALS=[
   {area:'Home & Life Admin',text:'Keep life admin stable - bills current, nothing falling through the cracks'}
 ];
 const STEPS=['Brain','Targets','Decide','Recurring','Prioritize','Intention','Done'];
+const P_COLORS={1:'#DC2626',2:'#D97706',3:'#16A34A',4:'#9CA3AF'};
+const P_LABELS={1:'P1',2:'P2',3:'P3',4:'P4'};
 
 var cur=0,brainLines=[],allItems=[],decisions={},deletedIds=new Set(),
     recurDone=new Set(),recurAdded=[],finalItems=[],todayCommitted=[],
     ranked=[],intention='',sortMode='priority',refineDecisions={},
-    taskRegistry={};
+    taskRegistry={},deliberateSel={},decidePhase='deciding';
 
 function iso(){return new Date().toISOString().slice(0,10);}
 function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 function dstr(){return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
-function pLabel(p){return p===1?'P1':p===2?'P2':p===3?'P3':'P4';}
+function pLabel(p){return P_LABELS[p]||'P4';}
+function pPill(p){return '<span style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid '+P_COLORS[p||4]+'33;color:'+P_COLORS[p||4]+';background:'+P_COLORS[p||4]+'15;font-weight:500;letter-spacing:.03em">'+pLabel(p||4)+'</span>';}
+function srcTag(src){var m={inbox:'Inbox',overdue:'Overdue',deliberate:'Deliberate',thisweek:'This week',waiting:'Waiting'};return '<span class="tag '+src+'">'+(m[src]||src)+'</span>';}
 function sortP(arr){return arr.slice().sort(function(a,b){return (a.priority||4)-(b.priority||4);});}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function btn(cls,icon,label,action,id){
-  return '<button class="btn '+cls+'" data-action="'+action+'" data-id="'+(id||'')+'" onclick="handleClick(this)">'+icon+' '+label+'</button>';
-}
 
 async function tGet(p){var r=await fetch(PROXY+p);if(!r.ok)throw new Error(r.status);var d=await r.json();return Array.isArray(d)?d:(d.results||d);}
 async function tPost(p,data){var r=await fetch(PROXY+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json();}
@@ -182,19 +191,71 @@ function back(){if(cur>0){cur--;render();}}
 function bbtn(){return cur>0?'<button class="back-link" onclick="back()">&#8592; Back</button>':'';}
 function render(){updHdr();var m=document.getElementById('main'),s=STEPS[cur];if(s==='Brain')rBrain(m);else if(s==='Targets')rTargets(m);else if(s==='Decide')rDecide(m);else if(s==='Recurring')rRecurring(m);else if(s==='Prioritize')rPrioritize(m);else if(s==='Intention')rIntention(m);else rDone(m);}
 
+// task tile - shared renderer
+function taskTile(t, opts){
+  // opts: {decided, decisionLabel, decisionCls, extra, showDesc, showActions, showRefine, showChange}
+  opts = opts || {};
+  var p = t.priority || 4;
+  var cls = 'task-row p'+p+(opts.decided?' '+opts.decisionCls:'');
+  var desc = (opts.showDesc && t.description) ? '<div class="task-desc">'+esc(t.description)+'</div>' : '';
+  var meta = '<div class="task-meta">'+pPill(p)+' '+srcTag(t._src||'');
+  if(opts.decisionLabel) meta += ' <span style="font-size:10px;font-weight:500;color:var(--dim)">'+opts.decisionLabel+'</span>';
+  if(opts.extra) meta += ' &middot; '+opts.extra;
+  if(opts.showChange) meta += '<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-left:6px;font-family:inherit;text-decoration:underline">change</button>';
+  meta += '</div>';
+  var actions = '';
+  if(opts.showActions){
+    actions = '<div class="task-actions">'+
+      '<button class="btn btn-do" data-action="decide-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it</button>'+
+      '<button class="btn btn-file" data-action="open-file" data-id="'+t.id+'" onclick="handleClick(this)">File</button>'+
+      '<button class="btn btn-think" data-action="open-delib" data-id="'+t.id+'" onclick="handleClick(this)">Deliberate</button>'+
+      '<button class="btn btn-del" data-action="decide-dump" data-id="'+t.id+'" onclick="handleClick(this)">Dump</button>'+
+      '</div>'+
+      '<div class="sub-panel" id="fp-'+t.id+'">'+
+      '<div class="sub-label">Move to project</div>'+
+      '<div class="proj-chips">'+PROJECTS.map(function(p){return '<button class="proj-chip" data-action="file-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
+      '</div>'+
+      '<div class="sub-panel" id="dp-'+t.id+'">'+
+      '<div class="sub-label">Surface back up...</div>'+
+      '<div class="date-opts">'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
+      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
+      '</div>'+
+      '<div id="delib-custom-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="deliberateCustomDate(\''+t.id+'\',this.value)" /></div>'+
+      '<div class="proj-chips" style="margin-top:6px"><span style="font-size:11px;color:var(--dim)">Also file in:</span>'+PROJECTS.map(function(p){return '<button class="proj-chip" id="delfp-'+t.id+'-'+p.id+'" data-action="delib-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
+      '</div>';
+  }
+  if(opts.showRefine){
+    actions = '<div class="task-actions">'+
+      '<button class="btn btn-do" data-action="refine-now" data-id="'+t.id+'" onclick="handleClick(this)">Now</button>'+
+      '<button class="btn btn-think" data-action="open-sched" data-id="'+t.id+'" onclick="handleClick(this)">Schedule</button>'+
+      '<button class="btn" data-action="refine-delegate" data-id="'+t.id+'" onclick="handleClick(this)">Delegate</button>'+
+      '<button class="btn btn-del" data-action="refine-dump" data-id="'+t.id+'" onclick="handleClick(this)">Dump</button>'+
+      '</div>'+
+      '<div class="sub-panel" id="sp-'+t.id+'">'+
+      '<div class="sub-label">Schedule for...</div>'+
+      '<div class="date-opts">'+
+      '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
+      '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
+      '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
+      '</div>'+
+      '<div id="sdate-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="schedCustom(\''+t.id+'\',this.value)" /></div>'+
+      '</div>';
+  }
+  return '<div class="'+cls+'" id="dr-'+t.id+'"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+desc+meta+actions+'</div></div>';
+}
+
 // BRAIN
 function rBrain(m){
   brainLines=[];
-  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 1 of '+(STEPS.length-1)+'</div><div class="card-title">Morning brainstorm</div><div class="card-body">Clear your mind. Type anything and hit Enter. Everything goes to your inbox.</div><div class="input-row"><input type="text" id="bin" placeholder="Type a thought and hit Enter..." /><button class="btn btn-primary" onclick="addBI()">Add</button></div><div id="blist"></div><div class="btn-row"><button class="btn btn-primary" id="bsbtn" onclick="subBrain()">Done &#8212; send to inbox</button><button class="btn-skip" onclick="next()">Nothing on my mind</button></div></div>';
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 1 of '+(STEPS.length-1)+'</div><div class="card-title">Morning brainstorm</div><div class="card-body">Clear your mind. Type anything and hit Enter.</div><div class="input-row"><input type="text" id="bin" placeholder="Type a thought and hit Enter..." /><button class="btn btn-primary" onclick="addBI()">Add</button></div><div id="blist"></div><div class="btn-row"><button class="btn btn-primary" id="bsbtn" onclick="subBrain()">Done &#8212; send to inbox</button><button class="btn-skip" onclick="next()">Nothing on my mind</button></div></div>';
   setTimeout(function(){var inp=document.getElementById('bin');if(inp){inp.focus();inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addBI();}});}},100);
 }
 function addBI(){var inp=document.getElementById('bin');if(!inp)return;var val=inp.value.trim();if(!val)return;brainLines.push(val);inp.value='';inp.focus();renderBL();}
 function removeBL(i){brainLines.splice(i,1);renderBL();}
-function renderBL(){
-  var el=document.getElementById('blist');if(!el)return;
-  el.innerHTML=brainLines.map(function(l,i){return '<div class="task-row"><div class="task-info"><div class="task-name">'+esc(l)+'</div></div><button data-action="removebrain" data-idx="'+i+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px">&times;</button></div>';}).join('');
-}
-async function subBrain(){if(!brainLines.length){next();return;}var btn=document.getElementById('bsbtn');btn.disabled=true;btn.textContent='Sending...';try{for(var i=0;i<brainLines.length;i++){await addTask(brainLines[i],'From morning brainstorm',PR.inbox,4,null);}brainLines=[];next();}catch(e){btn.disabled=false;btn.textContent='Done - send to inbox';}}
+function renderBL(){var el=document.getElementById('blist');if(!el)return;el.innerHTML=brainLines.map(function(l,i){return '<div class="task-row"><div class="task-info"><div class="task-name">'+esc(l)+'</div></div><button data-action="removebrain" data-idx="'+i+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px">&times;</button></div>';}).join('');}
+async function subBrain(){if(!brainLines.length){next();return;}var btn=document.getElementById('bsbtn');btn.disabled=true;btn.textContent='Sending...';try{for(var i=0;i<brainLines.length;i++){await addTask(brainLines[i],'From morning brainstorm',PR.inbox,4,null);}brainLines=[];next();}catch(e){btn.disabled=false;btn.textContent='Retry';}}
 
 // TARGETS
 function rTargets(m){
@@ -202,9 +263,6 @@ function rTargets(m){
 }
 
 // DECIDE
-var decidePhase='deciding'; // 'deciding' or 'summary'
-var deliberateSel={}; // id -> {date, projectId}
-
 function rDecide(m){
   m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 3 of '+(STEPS.length-1)+'</div><div class="card-title">Do it, deliberate, or dump it</div><div class="card-body">Every item gets a decision. Nothing passes through undecided.</div><div id="decide-body"><div class="loading"><div class="spin"></div>Pulling everything that needs a decision...</div></div></div>';
   loadDecide();
@@ -221,71 +279,39 @@ async function loadDecide(){
   }catch(e){document.getElementById('decide-body').innerHTML='<div class="empty-note">Could not load items.</div><button class="btn btn-primary" onclick="next()">Skip</button>';}
 }
 
-function srcTag(src){var m={inbox:'Inbox',overdue:'Overdue',deliberate:'Deliberate',thisweek:'This week',waiting:'Waiting'};return '<span class="tag '+src+'">'+(m[src]||src)+'</span>';}
+var dCls={do:'do-it',file:'filed',deliberate:'deliberated',dump:'dumped'};
+var dLabel={do:'Do it',file:'Filed',deliberate:'Deliberate',dump:'Dump it'};
 
 function showDecide(){
   if(decidePhase==='summary'){showSummary();return;}
   var el=document.getElementById('decide-body');if(!el)return;
   var pending=allItems.filter(function(t){return !decisions[t.id]&&!deletedIds.has(t.id);});
-  var decided=allItems.filter(function(t){return decisions[t.id];});
   if(!allItems.length){el.innerHTML='<div class="empty-note">Nothing needs a decision.</div><button class="btn btn-primary" onclick="next()">Next</button>';return;}
   if(!pending.length){decidePhase='summary';showSummary();return;}
 
-  var topHtml='';
-  if(decided.length){
-    var dmap={do:{cls:'do-it',label:'Do it'},file:{cls:'filed',label:'Filed'},deliberate:{cls:'deliberated',label:'Deliberate'},dump:{cls:'dumped',label:'Dump'}};
-    topHtml=decided.map(function(t){var d=decisions[t.id],dm=dmap[d.action]||{};var extra='';if(d.action==='deliberate'&&d.date)extra=' &middot; '+d.date;if(d.action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=' &middot; '+p.name;}return '<div class="task-row '+(dm.cls||'')+'" style="margin-bottom:4px"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta"><span style="font-size:10px;font-weight:500">'+dm.label+'</span>'+extra+'<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-left:8px;font-family:inherit;text-decoration:underline">change</button></div></div></div>';}).join('')+'<hr>';
-  }
-
-  var pendingHtml=pending.map(function(t){
-    return '<div class="task-row p'+(t.priority||4)+'" id="dr-'+t.id+'">'+
-      '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
-      '<div class="task-meta">'+pLabel(t.priority||4)+' &middot; '+srcTag(t._src)+'</div>'+
-      '<div class="task-actions">'+
-      '<button class="btn btn-do" data-action="decide-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it</button>'+
-      '<button class="btn btn-file" data-action="open-file" data-id="'+t.id+'" onclick="handleClick(this)">&#8594; File it</button>'+
-      '<button class="btn btn-think" data-action="open-delib" data-id="'+t.id+'" onclick="handleClick(this)">&#8986; Deliberate</button>'+
-      '<button class="btn btn-del" data-action="decide-dump" data-id="'+t.id+'" onclick="handleClick(this)">&#215; Dump it</button>'+
-      '</div>'+
-      '<div class="sub-panel" id="fp-'+t.id+'">'+
-      '<div class="sub-label">Move to project</div>'+
-      '<div class="proj-chips">'+PROJECTS.map(function(p){return '<button class="proj-chip" data-action="file-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
-      '</div>'+
-      '<div class="sub-panel" id="dp-'+t.id+'">'+
-      '<div class="sub-label">Surface back up...</div>'+
-      '<div class="date-opts">'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
-      '</div>'+
-      '<div id="delib-custom-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="deliberateCustomDate(\''+t.id+'\',this.value)" /></div>'+
-      '<div class="proj-chips" style="margin-top:6px"><span style="font-size:11px;color:var(--dim)">Also file in:</span>'+PROJECTS.map(function(p){return '<button class="proj-chip" id="delfp-'+t.id+'-'+p.id+'" data-action="delib-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
-      '</div>'+
-      '</div></div>';
+  // ALL items shown, decided ones show their label + change button (no action buttons)
+  var html=allItems.filter(function(t){return !deletedIds.has(t.id);}).map(function(t){
+    var d=decisions[t.id];
+    if(d){
+      // show as decided tile with label
+      var extra='';
+      if(d.action==='deliberate'&&d.date)extra=d.date;
+      if(d.action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=p.name;}
+      return taskTile(t,{decided:true,decisionCls:dCls[d.action]||'',decisionLabel:dLabel[d.action]||'',extra:extra,showDesc:true,showChange:true});
+    } else {
+      return taskTile(t,{showDesc:true,showActions:true});
+    }
   }).join('');
 
-  el.innerHTML=topHtml+pendingHtml+'<div class="btn-row"><button class="btn-skip" data-action="skip-remaining" onclick="handleClick(this)">Skip remaining '+pending.length+' items</button></div>';
+  el.innerHTML=html+'<div class="btn-row"><button class="btn-skip" data-action="skip-remaining" onclick="handleClick(this)">Skip remaining '+pending.length+' items</button></div>';
 }
 
-function deliberateCustomDate(id,val){
-  if(!val)return;
-  if(!deliberateSel[id])deliberateSel[id]={};
-  deliberateSel[id].date=val;
-  commitDeliberate(id);
-}
+function deliberateCustomDate(id,val){if(!val)return;if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].date=val;commitDeliberate(id);}
 
 async function commitDeliberate(id){
-  var sel=deliberateSel[id]||{};
-  if(!sel.date)return;
+  var sel=deliberateSel[id]||{};if(!sel.date)return;
   decisions[id]={action:'deliberate',date:sel.date,projectId:sel.projectId||null};
-  try{
-    await setDue(id,sel.date);
-    var task=taskRegistry[id];
-    var labels=task?(task.labels||[]).filter(function(l){return l!=='thisweek'&&l!=='waiting';}).concat(['deliberate']):['deliberate'];
-    await setLabels(id,labels);
-    if(sel.projectId)await moveTask(id,sel.projectId);
-  }catch(e){}
-  var panel=document.getElementById('dp-'+id);if(panel)panel.classList.remove('open');
+  try{await setDue(id,sel.date);var task=taskRegistry[id];var labels=task?(task.labels||[]).filter(function(l){return l!=='thisweek'&&l!=='waiting';}).concat(['deliberate']):['deliberate'];await setLabels(id,labels);if(sel.projectId)await moveTask(id,sel.projectId);}catch(e){}
   showDecide();
 }
 
@@ -293,61 +319,52 @@ function showSummary(){
   var el=document.getElementById('decide-body');if(!el)return;
   var groups={do:[],file:[],deliberate:[],dump:[]};
   allItems.forEach(function(t){var d=decisions[t.id];if(d&&groups[d.action])groups[d.action].push(t);});
-  var html='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem">All decisions made. Review below.</div>';
-  var labels={do:'Do it',file:'Filed',deliberate:'Deliberate',dump:'Dump it'};
-  var clsMap={do:'do-it',file:'filed',deliberate:'deliberated',dump:'dumped'};
+
+  var html='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem">Decisions made. Now refine your Do It list.</div>';
+
+  // Summary tiles - compact, no action buttons, show label
   ['do','file','deliberate','dump'].forEach(function(action){
     var items=groups[action];if(!items.length)return;
-    html+='<div class="section-head">'+labels[action]+' <span class="section-count">'+items.length+'</span></div>';
+    html+='<div class="section-head">'+dLabel[action]+' <span class="section-count">'+items.length+'</span></div>';
     html+=items.map(function(t){
       var d=decisions[t.id],extra='';
-      if(action==='deliberate'&&d.date)extra=' &middot; '+d.date;
-      if(action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=' &middot; '+p.name;}
-      return '<div class="task-row '+clsMap[action]+'"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta">'+extra+(action!=='dump'?'<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;margin-left:8px;font-family:inherit;text-decoration:underline">change</button>':'')+'</div></div></div>';
+      if(action==='deliberate'&&d.date)extra=d.date;
+      if(action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=p.name;}
+      return taskTile(t,{decided:true,decisionCls:dCls[action],showChange:(action!=='dump'),extra:extra,showDesc:false});
     }).join('');
   });
 
+  // Refine Do It - inline buttons on SAME tile, no duplicate list below
   var doItems=groups.do;
   if(doItems.length){
-    html+='<hr><div style="font-family:\'Playfair Display\',serif;font-size:17px;margin-bottom:.4rem">Refine: Do it now, schedule, or delegate?</div>';
-    html+='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Decide exactly how each Do It item happens.</div>';
+    html+='<hr style="border:none;border-top:1px solid var(--rule);margin:1rem 0"><div style="font-family:\'Playfair Display\',serif;font-size:17px;margin-bottom:.4rem">Refine your Do It list</div>';
+    html+='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Do it now, schedule, delegate, or change your mind.</div>';
     html+=doItems.map(function(t){
-      return '<div class="task-row p'+(t.priority||4)+'" id="ri-'+t.id+'">'+
-        '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
-        '<div class="task-meta">'+pLabel(t.priority||4)+'</div>'+
-        '<div class="task-actions">'+
-        '<button class="btn btn-do" data-action="refine-now" data-id="'+t.id+'" onclick="handleClick(this)">&#9889; Do it now</button>'+
-        '<button class="btn btn-think" data-action="open-sched" data-id="'+t.id+'" onclick="handleClick(this)">&#128197; Schedule</button>'+
-        '<button class="btn" data-action="refine-delegate" data-id="'+t.id+'" onclick="handleClick(this)">&#128101; Delegate</button>'+
-        '<button class="btn btn-del" data-action="refine-dump" data-id="'+t.id+'" onclick="handleClick(this)">&#215; Dump</button>'+
-        '</div>'+
-        '<div class="sub-panel" id="sp-'+t.id+'">'+
-        '<div class="sub-label">Schedule for...</div>'+
-        '<div class="date-opts">'+
-        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
-        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
-        '<button class="date-chip" data-action="sched-pick" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
-        '</div>'+
-        '<div id="sdate-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="schedCustom(\''+t.id+'\',this.value)" /></div>'+
-        '</div></div></div>';
+      var r=refineDecisions[t.id];
+      if(r){
+        var rl={now:'Doing now',schedule:'Scheduled',delegate:'Delegating',dump:'Dumped'};
+        return '<div class="task-row p'+(t.priority||4)+'" style="opacity:.5"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta">'+pPill(t.priority||4)+' <span style="font-size:10px;font-weight:500">'+(rl[r.action]||''+(r.date?' &middot; '+r.date:''))+'</span></div></div></div>';
+      }
+      return taskTile(t,{showDesc:true,showRefine:true});
     }).join('');
   }
+
   html+='<div class="btn-row"><button class="btn btn-primary" onclick="finishDecide()">Done &#8212; move to recurring</button></div>';
   el.innerHTML=html;
-  finalItems=[];
 }
 
 function schedCustom(id,val){if(!val)return;applyRefine(id,'schedule',val);}
-
 async function applyRefine(id,action,date){
   refineDecisions[id]={action:action,date:date};
-  try{
-    if(action==='now')await setDue(id,iso());
-    else if(action==='schedule'&&date)await setDue(id,date);
-    else if(action==='dump'){await delTask(id);}
-  }catch(e){}
-  var el=document.getElementById('ri-'+id);if(el){el.style.opacity='.4';el.style.pointerEvents='none';}
-  var sp=document.getElementById('sp-'+id);if(sp)sp.classList.remove('open');
+  try{if(action==='now')await setDue(id,iso());else if(action==='schedule'&&date)await setDue(id,date);else if(action==='dump')await delTask(id);}catch(e){}
+  // Update tile in place
+  var el=document.getElementById('dr-'+id);
+  if(el){
+    var rl={now:'Doing now',schedule:'Scheduled for '+(date||''),delegate:'Delegating',dump:'Dumped'};
+    el.style.opacity='.5';el.style.pointerEvents='none';
+    var meta=el.querySelector('.task-meta');
+    if(meta){var sp=el.querySelector('.sub-panel');if(sp)sp.remove();var acts=el.querySelector('.task-actions');if(acts)acts.remove();meta.innerHTML=pPill(el.className.includes('p1')?1:el.className.includes('p2')?2:el.className.includes('p3')?3:4)+' <span style="font-size:10px;font-weight:500">'+(rl[action]||action)+'</span>';}
+  }
 }
 
 function finishDecide(){
@@ -358,7 +375,7 @@ function finishDecide(){
 
 // RECURRING
 function rRecurring(m){
-  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 4 of '+(STEPS.length-1)+'</div><div class="card-title">Recurring tasks</div><div class="card-body">These repeat on a schedule. Do it today, skip just this once, or remove entirely.</div><div id="rec-body"><div class="loading"><div class="spin"></div>Pulling recurring tasks...</div></div></div>';
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 4 of '+(STEPS.length-1)+'</div><div class="card-title">Recurring tasks</div><div class="card-body">Do it today, skip just this once, or remove entirely.</div><div id="rec-body"><div class="loading"><div class="spin"></div>Pulling recurring tasks...</div></div></div>';
   loadRecurring();
 }
 async function loadRecurring(){try{var t=await getRecurring();showRecurring(t);}catch(e){document.getElementById('rec-body').innerHTML='<div class="empty-note">Could not load.</div><button class="btn btn-primary" onclick="next()">Next</button>';}}
@@ -369,10 +386,11 @@ function showRecurring(tasks){
   el.innerHTML=sortP(rem).map(function(t){
     return '<div class="task-row p'+(t.priority||4)+'" id="rec-'+t.id+'">'+
       '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
-      '<div class="task-meta"><span class="tag recurring">Recurring</span> &middot; '+pLabel(t.priority||4)+'</div>'+
+      (t.description?'<div class="task-desc">'+esc(t.description)+'</div>':'')+
+      '<div class="task-meta">'+pPill(t.priority||4)+' <span class="tag recurring">Recurring</span></div>'+
       '<div class="task-actions">'+
-      '<button class="btn btn-do" data-action="recur-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it today</button>'+
-      '<button class="btn" data-action="recur-skip" data-id="'+t.id+'" onclick="handleClick(this)">Skip today</button>'+
+      '<button class="btn btn-do" data-action="recur-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it</button>'+
+      '<button class="btn" data-action="recur-skip" data-id="'+t.id+'" onclick="handleClick(this)">Skip</button>'+
       '<button class="btn btn-del" data-action="recur-remove" data-id="'+t.id+'" onclick="handleClick(this)">Remove</button>'+
       '</div></div></div>';
   }).join('')+'<div class="btn-row"><button class="btn btn-primary" onclick="next()">Done &#8212; prioritize</button></div>';
@@ -380,7 +398,7 @@ function showRecurring(tasks){
 
 // PRIORITIZE
 function rPrioritize(m){
-  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 5 of '+(STEPS.length-1)+'</div><div class="card-title">Prioritize</div><div class="card-body">Everything you\'re doing today. Tap to mark focus items. Use P dropdowns to re-rank.</div><div id="pri-body"><div class="loading"><div class="spin"></div>Building today\'s list...</div></div></div>';
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 5 of '+(STEPS.length-1)+'</div><div class="card-title">Prioritize</div><div class="card-body">Everything you\'re doing today. Tap to mark focus items. Use P dropdown to re-rank.</div><div id="pri-body"><div class="loading"><div class="spin"></div>Building today\'s list...</div></div></div>';
   loadPrioritize();
 }
 async function loadPrioritize(){
@@ -401,13 +419,13 @@ function showPrioritize(){
   if(sortMode==='focus')sorted.sort(function(a,b){var ai=ranked.findIndex(function(r){return r.id===a.id;}),bi=ranked.findIndex(function(r){return r.id===b.id;});if(ai>-1&&bi>-1)return ai-bi;if(ai>-1)return -1;if(bi>-1)return 1;return(a.priority||4)-(b.priority||4);});
   else sorted=sortP(sorted);
   el.innerHTML='<div class="sort-bar"><span style="font-size:11px;color:var(--dim);font-weight:300">Sort:</span><button class="sort-btn'+(sortMode==='priority'?' active':'')+'" onclick="setSort(\'priority\')">Priority</button><button class="sort-btn'+(sortMode==='focus'?' active':'')+'" onclick="setSort(\'focus\')">Focus first</button></div>'+
-    '<div style="font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.75rem">'+ranked.length+' focus item'+(ranked.length!==1?'s':'')+' (tap to toggle)</div>'+
+    '<div style="font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.75rem">'+ranked.length+' focus item'+(ranked.length!==1?'s':'')+' (tap row to toggle)</div>'+
     sorted.map(function(t){
       var ri=ranked.findIndex(function(r){return r.id===t.id;}),isFocus=ri>-1;
       return '<div class="rank-item p'+(t.priority||4)+(isFocus?' focused':'')+'" data-action="toggle-rank" data-id="'+t.id+'" onclick="handleClick(this)">'+
         '<div class="rank-num">'+(isFocus?(ri+1):'&middot;')+'</div>'+
-        '<div style="flex:1"><div style="font-size:13px;line-height:1.4">'+esc(t.content)+'</div></div>'+
-        '<select class="p-select" data-action="change-p" data-id="'+t.id+'" onclick="event.stopPropagation()" onchange="handlePChange(this)">'+
+        '<div style="flex:1;min-width:0"><div style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(t.content)+'</div></div>'+
+        '<select class="p-select" data-action="change-p" data-id="'+t.id+'" onclick="event.stopPropagation()" onchange="handlePChange(this)" style="border-color:'+P_COLORS[t.priority||4]+';color:'+P_COLORS[t.priority||4]+'">'+
         '<option value="1"'+(t.priority===1?' selected':'')+'>P1</option>'+
         '<option value="2"'+(t.priority===2?' selected':'')+'>P2</option>'+
         '<option value="3"'+(t.priority===3?' selected':'')+'>P3</option>'+
@@ -422,22 +440,22 @@ function handlePChange(sel){var id=sel.getAttribute('data-id'),p=parseInt(sel.va
 // INTENTION
 function rIntention(m){
   var focused=ranked.slice(0,5);
-  var fhtml=focused.length?'<div style="margin-bottom:1.25rem">'+focused.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
-  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 6 of '+(STEPS.length-1)+'</div><div class="card-title">Set your intention</div><div class="card-body">Optional. Today is a win if...</div>'+fhtml+'<input type="text" id="iin" placeholder="Today is a win if..." style="margin-bottom:1rem" /><div class="btn-row"><button class="btn btn-primary" id="ibtn" onclick="subIntent()">Lock it in</button><button class="btn-skip" onclick="next()">Skip intention</button></div><div id="iout"></div></div>';
+  var fhtml=focused.length?'<div style="margin-bottom:1.25rem">'+focused.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  m.innerHTML='<div class="card">'+bbtn()+'<div class="card-eyebrow">Step 6 of '+(STEPS.length-1)+'</div><div class="card-title">Set your intention</div><div class="card-body">Optional. Today is a win if...</div>'+fhtml+'<input type="text" id="iin" placeholder="Today is a win if..." style="margin-bottom:1rem" /><div class="btn-row"><button class="btn btn-primary" id="ibtn" onclick="subIntent()">Lock it in</button><button class="btn-skip" onclick="next()">Skip</button></div><div id="iout"></div></div>';
   setTimeout(function(){var i=document.getElementById('iin');if(i)i.focus();},100);
 }
 async function subIntent(){var val=document.getElementById('iin').value.trim();if(!val){next();return;}intention='Today is a win if '+val;var b=document.getElementById('ibtn');b.disabled=true;b.textContent='Saving...';try{await addTask("Today's intention",intention,PR.daily,1,iso());next();}catch(e){document.getElementById('iout').innerHTML='<div style="font-size:12px;color:var(--acc);margin-top:.5rem">Could not save.</div>';setTimeout(next,1500);}}
 
 // DONE
 function rDone(m){
-  var ihtml=intention?'<div class="card"><div class="card-eyebrow">Win condition</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;line-height:1.4;font-style:italic">'+esc(intention)+'</div></div>':'';
-  var fhtml=ranked.length?'<div class="card"><div class="card-eyebrow">Top priorities</div>'+ranked.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  var ihtml=intention?'<div class="card"><div class="card-eyebrow">Win condition</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;line-height:1.4;font-style:italic;word-break:break-word">'+esc(intention)+'</div></div>':'';
+  var fhtml=ranked.length?'<div class="card"><div class="card-eyebrow">Top priorities</div>'+ranked.map(function(t,i){return '<div class="done-row"><span class="done-n focus">'+(i+1)+'</span><span style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:block">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
   var rest=todayCommitted.filter(function(t){return !ranked.find(function(r){return r.id===t.id;})&&!deletedIds.has(t.id);});
-  var rhtml=rest.length?'<div class="card"><div class="card-eyebrow">Also today</div>'+rest.map(function(t,i){return '<div class="done-row"><span class="done-n">'+(ranked.length+i+1)+'</span><span style="font-size:13px;line-height:1.4;color:var(--dim)">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
+  var rhtml=rest.length?'<div class="card"><div class="card-eyebrow">Also today</div>'+rest.map(function(t,i){return '<div class="done-row"><span class="done-n">'+(ranked.length+i+1)+'</span><span style="font-size:13px;line-height:1.4;color:var(--dim);overflow:hidden;text-overflow:ellipsis;display:block">'+esc(t.content)+'</span></div>';}).join('')+'</div>':'';
   m.innerHTML='<div style="text-align:center;padding:1.5rem 0 1rem"><div style="font-size:40px;margin-bottom:.75rem">&#127749;</div><div style="font-family:\'Playfair Display\',serif;font-size:26px;letter-spacing:-.5px;margin-bottom:.25rem">You\'re set.</div><div style="font-size:13px;color:var(--dim);font-weight:300">Morning ritual complete. Go build.</div></div>'+ihtml+fhtml+rhtml+'<div class="btn-row" style="margin-top:.5rem"><button class="btn" onclick="resetAll()">&#8635; Start over</button></div>';
 }
 
-// CENTRAL CLICK HANDLER - no inline IDs in onclick
+// CENTRAL CLICK HANDLER
 async function handleClick(el){
   var action=el.getAttribute('data-action'),id=el.getAttribute('data-id');
   if(action==='removebrain'){removeBL(parseInt(el.getAttribute('data-idx')));return;}
@@ -456,11 +474,11 @@ async function handleClick(el){
     else if(when==='custom'){var cw=document.getElementById('delib-custom-'+id);if(cw)cw.style.display='block';}
     return;
   }
-  if(action==='delib-proj'){var proj=el.getAttribute('data-proj');if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].projectId=deliberateSel[id].projectId===proj?null:proj;var siblings=el.parentNode.querySelectorAll('.proj-chip');siblings.forEach(function(s){s.classList.remove('sel');});if(deliberateSel[id].projectId)el.classList.add('sel');return;}
+  if(action==='delib-proj'){var proj=el.getAttribute('data-proj');if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].projectId=deliberateSel[id].projectId===proj?null:proj;el.classList.toggle('sel',!!deliberateSel[id].projectId);return;}
   if(action==='skip-remaining'){allItems.forEach(function(t){if(!decisions[t.id])decisions[t.id]={action:'skip'};});decidePhase='summary';showSummary();return;}
   if(action==='refine-now'){applyRefine(id,'now',null);return;}
-  if(action==='refine-delegate'){refineDecisions[id]={action:'delegate'};var ri=document.getElementById('ri-'+id);if(ri){ri.style.opacity='.4';ri.style.pointerEvents='none';}return;}
-  if(action==='refine-dump'){refineDecisions[id]={action:'dump'};try{await delTask(id);}catch(e){}var ri2=document.getElementById('ri-'+id);if(ri2){ri2.style.opacity='.4';ri2.style.pointerEvents='none';}return;}
+  if(action==='refine-delegate'){refineDecisions[id]={action:'delegate'};var ri=document.getElementById('dr-'+id);if(ri){ri.style.opacity='.5';ri.style.pointerEvents='none';}return;}
+  if(action==='refine-dump'){refineDecisions[id]={action:'dump'};try{await delTask(id);}catch(e){}var ri2=document.getElementById('dr-'+id);if(ri2){ri2.style.opacity='.5';ri2.style.pointerEvents='none';}return;}
   if(action==='open-sched'){var sp=document.getElementById('sp-'+id);if(sp)sp.classList.toggle('open');return;}
   if(action==='sched-pick'){
     var when2=el.getAttribute('data-when');
@@ -470,7 +488,7 @@ async function handleClick(el){
     else if(when2==='custom'){var sw=document.getElementById('sdate-'+id);if(sw)sw.style.display='block';}
     return;
   }
-  if(action==='recur-do'){recurDone.add(id);try{await setDue(id,iso());var t2=taskRegistry[id];if(t2)recurAdded.push(t2);}catch(e){}var re=document.getElementById('rec-'+id);if(re){re.style.opacity='.3';setTimeout(function(){if(re.parentNode)re.remove();},300);}return;}
+  if(action==='recur-do'){recurDone.add(id);var task=taskRegistry[id]||allItems.find(function(t){return t.id===id;});try{await setDue(id,iso());if(task)recurAdded.push(task);}catch(e){}var re=document.getElementById('rec-'+id);if(re){re.style.opacity='.3';setTimeout(function(){if(re.parentNode)re.remove();},300);}return;}
   if(action==='recur-skip'){recurDone.add(id);var re2=document.getElementById('rec-'+id);if(re2){re2.style.opacity='.3';setTimeout(function(){if(re2.parentNode)re2.remove();},300);}return;}
   if(action==='recur-remove'){recurDone.add(id);try{await delTask(id);}catch(e){}var re3=document.getElementById('rec-'+id);if(re3){re3.style.opacity='.3';setTimeout(function(){if(re3.parentNode)re3.remove();},300);}return;}
   if(action==='toggle-rank'){var t3=todayCommitted.find(function(x){return x.id===id;});if(!t3)return;var ri3=ranked.findIndex(function(r){return r.id===id;});if(ri3>-1)ranked.splice(ri3,1);else ranked.push(t3);showPrioritize();return;}
