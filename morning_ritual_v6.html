@@ -182,7 +182,7 @@ async function delTask(id){deletedIds.add(id);return tDel('/tasks/'+id);}
 async function setDue(id,date){return tPost('/tasks/'+id,{due_date:date});}
 async function setLabels(id,labels){return tPost('/tasks/'+id,{labels:labels});}
 async function setPriority(id,prio){return tPost('/tasks/'+id,{priority:prio});}
-async function moveTask(id,pid){return tPost('/tasks/'+id,{project_id:pid});}
+async function moveTask(id,pid){return tPost('/tasks/'+id+'/move',{project_id:pid});}
 async function addTask(content,desc,pid,prio,due){var b={content:content,project_id:pid,priority:prio||4};if(desc)b.description=desc;if(due)b.due_date=due;return tPost('/tasks',b);}
 
 function updHdr(){
@@ -208,25 +208,12 @@ function taskTile(t, opts){
   meta += '</div>';
   var actions = '';
   if(opts.showActions){
+    // Pass 1: pure categorization - instant decisions, no panels
     actions = '<div class="task-actions">'+
       '<button class="btn btn-do" data-action="decide-do" data-id="'+t.id+'" onclick="handleClick(this)">&#10003; Do it</button>'+
-      '<button class="btn btn-file" data-action="open-file" data-id="'+t.id+'" onclick="handleClick(this)">File</button>'+
-      '<button class="btn btn-think" data-action="open-delib" data-id="'+t.id+'" onclick="handleClick(this)">Deliberate</button>'+
+      '<button class="btn btn-file" data-action="decide-file" data-id="'+t.id+'" onclick="handleClick(this)">File</button>'+
+      '<button class="btn btn-think" data-action="decide-deliberate" data-id="'+t.id+'" onclick="handleClick(this)">Deliberate</button>'+
       '<button class="btn btn-del" data-action="decide-dump" data-id="'+t.id+'" onclick="handleClick(this)">Dump</button>'+
-      '</div>'+
-      '<div class="sub-panel" id="fp-'+t.id+'">'+
-      '<div class="sub-label">Move to project</div>'+
-      '<div class="proj-chips">'+PROJECTS.map(function(p){return '<button class="proj-chip" data-action="file-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
-      '</div>'+
-      '<div class="sub-panel" id="dp-'+t.id+'">'+
-      '<div class="sub-label">Surface back up...</div>'+
-      '<div class="date-opts">'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
-      '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
-      '</div>'+
-      '<div id="delib-custom-'+t.id+'" style="display:none;margin-top:6px"><input type="date" onchange="deliberateCustomDate(\''+t.id+'\',this.value)" /></div>'+
-      '<div class="proj-chips" style="margin-top:6px"><span style="font-size:11px;color:var(--dim)">Also file in:</span>'+PROJECTS.map(function(p){return '<button class="proj-chip" id="delfp-'+t.id+'-'+p.id+'" data-action="delib-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
       '</div>';
   }
   if(opts.showRefine){
@@ -292,24 +279,40 @@ function showDecide(){
   if(!allItems.length){el.innerHTML='<div class="empty-note">Nothing needs a decision.</div><button class="btn btn-primary" onclick="next()">Next</button>';return;}
   if(!pending.length){decidePhase='summary';showSummary();return;}
 
-  // ALL items shown, decided ones show their label + change button (no action buttons)
-  var html=allItems.filter(function(t){return !deletedIds.has(t.id);}).map(function(t){
-    var d=decisions[t.id];
-    if(d){
-      // show as decided tile with label
-      var extra='';
-      if(d.action==='deliberate'&&d.date)extra=d.date;
-      if(d.action==='file'&&d.projectId){var p=PROJECTS.find(function(x){return x.id===d.projectId;});if(p)extra=p.name;}
-      return taskTile(t,{decided:true,decisionCls:dCls[d.action]||'',decisionLabel:dLabel[d.action]||'',extra:extra,showDesc:true,showChange:true});
-    } else {
-      return taskTile(t,{showDesc:true,showActions:true});
-    }
+  var decided=allItems.filter(function(t){return decisions[t.id];});
+
+  // Pending tasks at TOP - show one at a time feel but all visible, undecided first
+  var pendingHtml=pending.map(function(t,i){
+    return taskTile(t,{showDesc:true,showActions:true,isFirst:i===0});
   }).join('');
 
-  el.innerHTML=html+'<div class="btn-row"><button class="btn-skip" data-action="skip-remaining" onclick="handleClick(this)">Skip remaining '+pending.length+' items</button></div>';
+  // Decided tasks stacked at BOTTOM by category
+  var decidedHtml='';
+  if(decided.length){
+    var groups={do:[],file:[],deliberate:[],dump:[]};
+    decided.forEach(function(t){var d=decisions[t.id];if(d&&groups[d.action])groups[d.action].push(t);});
+    decidedHtml='<div style="margin-top:1.25rem">';
+    ['do','deliberate','file','dump'].forEach(function(action){
+      var items=groups[action];if(!items.length)return;
+      decidedHtml+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);font-weight:500;margin-bottom:4px;margin-top:.75rem">'+dLabel[action]+'</div>';
+      decidedHtml+=items.map(function(t){
+        return '<div class="task-row '+(dCls[action]||'')+'" style="margin-bottom:3px;opacity:.75">'+
+          '<div class="task-info"><div class="task-name" style="font-size:12px">'+esc(t.content)+'</div></div>'+
+          '<button data-action="undecide" data-id="'+t.id+'" onclick="handleClick(this)" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;font-family:inherit;white-space:nowrap;flex-shrink:0">undo</button>'+
+          '</div>';
+      }).join('');
+    });
+    decidedHtml+='</div>';
+  }
+
+  var progress=decided.length+'/'+allItems.filter(function(t){return !deletedIds.has(t.id);}).length;
+  el.innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:.75rem;font-weight:300">'+progress+' decided &middot; '+pending.length+' remaining</div>'+
+    pendingHtml+decidedHtml+
+    '<div class="btn-row" style="margin-top:.75rem"><button class="btn-skip" data-action="skip-remaining" onclick="handleClick(this)">Skip remaining '+pending.length+' items</button></div>';
 }
 
 function deliberateCustomDate(id,val){if(!val)return;if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].date=val;commitDeliberate(id);}
+function handleDelibCustom(el){var id=el.getAttribute('data-id'),val=el.value;if(!val||!id)return;if(!deliberateSel[id])deliberateSel[id]={};deliberateSel[id].date=val;commitDeliberate(id);}
 
 async function commitDeliberate(id){
   var sel=deliberateSel[id]||{};if(!sel.date)return;
@@ -339,17 +342,51 @@ function showSummary(){
 
   // Refine Do It - inline buttons on SAME tile, no duplicate list below
   var doItems=groups.do;
-  if(doItems.length){
-    html+='<hr style="border:none;border-top:1px solid var(--rule);margin:1rem 0"><div style="font-family:\'Playfair Display\',serif;font-size:17px;margin-bottom:.4rem">Refine your Do It list</div>';
-    html+='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Do it now, schedule, delegate, or change your mind.</div>';
-    html+=doItems.map(function(t){
-      var r=refineDecisions[t.id];
-      if(r){
-        var rl={now:'Doing now',schedule:'Scheduled',delegate:'Delegating',dump:'Dumped'};
-        return '<div class="task-row p'+(t.priority||4)+'" style="opacity:.5"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta">'+pPill(t.priority||4)+' <span style="font-size:10px;font-weight:500">'+(rl[r.action]||''+(r.date?' &middot; '+r.date:''))+'</span></div></div></div>';
-      }
-      return taskTile(t,{showDesc:true,showRefine:true});
-    }).join('');
+  var fileItems2=groups.file;
+  var delibItems2=groups.deliberate;
+  var hasRefine=doItems.length||fileItems2.length||delibItems2.length;
+  if(hasRefine){
+    html+='<hr style="border:none;border-top:1px solid var(--rule);margin:1rem 0"><div style="font-family:\'Playfair Display\',serif;font-size:17px;margin-bottom:.4rem">Refine your list</div>';
+    html+='<div style="font-size:12px;color:var(--dim);margin-bottom:.75rem;font-weight:300">Add details — when, where, and how each item gets handled.</div>';
+    if(delibItems2.length){
+      html+='<div style="font-size:11px;color:var(--gold);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Deliberate — when to resurface?</div>';
+      html+=delibItems2.map(function(t){
+        var d=decisions[t.id],already=d&&d.date;
+        return '<div class="task-row deliberated" id="dr-'+t.id+'"'+(already?' style="opacity:.5;pointer-events:none"':'')+'>'+
+          '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
+          '<div class="task-meta">'+pPill(t.priority||4)+(already?' &middot; '+d.date:'')+'</div>'+
+          (already?'':
+            '<div class="task-actions">'+
+            '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="tomorrow" onclick="handleClick(this)">Tomorrow</button>'+
+            '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="nextweek" onclick="handleClick(this)">Next week</button>'+
+            '<button class="date-chip" data-action="delib-date" data-id="'+t.id+'" data-when="custom" onclick="handleClick(this)">Pick date</button>'+
+            '</div>'+
+            '<div id="delib-custom-'+t.id+'" style="display:none;margin-top:6px"><input type="date" data-id="'+t.id+'" onchange="handleDelibCustom(this)" /></div>'+
+            '<div class="proj-chips" style="margin-top:6px"><span style="font-size:11px;color:var(--dim)">Also file in:</span>'+PROJECTS.map(function(p){return '<button class="proj-chip" id="delfp-'+t.id+'-'+p.id+'" data-action="delib-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'
+          )+
+          '</div></div>';
+      }).join('');
+    }
+    if(fileItems2.length){
+      html+='<div style="font-size:11px;color:var(--blue);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .5rem">File — which project?</div>';
+      html+=fileItems2.map(function(t){
+        var d=decisions[t.id],alreadyFiled=d&&d.projectId;
+        var proj=alreadyFiled?PROJECTS.find(function(x){return x.id===d.projectId;}):null;
+        return '<div class="task-row filed" id="dr-'+t.id+'"'+(alreadyFiled?' style="opacity:.5;pointer-events:none"':'')+'>'+
+          '<div class="task-info"><div class="task-name">'+esc(t.content)+'</div>'+
+          '<div class="task-meta">'+pPill(t.priority||4)+(proj?' &middot; '+proj.name:'')+'</div>'+
+          '<div class="proj-chips" style="margin-top:6px">'+PROJECTS.map(function(p){return '<button class="proj-chip'+(alreadyFiled&&d.projectId===p.id?' sel':'')+'" data-action="file-proj" data-id="'+t.id+'" data-proj="'+p.id+'" onclick="handleClick(this)">'+p.name+'</button>';}).join('')+'</div>'+
+          '</div></div>';
+      }).join('');
+    }
+    if(doItems.length){
+      html+='<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .5rem">Do it — how and when?</div>';
+      html+=doItems.map(function(t){
+        var r=refineDecisions[t.id];
+        if(r){var rl={now:'Doing now',schedule:'Scheduled '+(r.date||''),delegate:'Delegating',dump:'Dumped'};return '<div class="task-row p'+(t.priority||4)+'" style="opacity:.5"><div class="task-info"><div class="task-name">'+esc(t.content)+'</div><div class="task-meta">'+pPill(t.priority||4)+' <span style="font-size:10px;font-weight:500">'+(rl[r.action]||r.action)+'</span></div></div></div>';}
+        return taskTile(t,{showDesc:true,showRefine:true});
+      }).join('');
+    }
   }
 
   html+='<div class="btn-row"><button class="btn btn-primary" onclick="finishDecide()">Done &#8212; move to recurring</button></div>';
@@ -370,7 +407,28 @@ async function applyRefine(id,action,date){
   }
 }
 
-function finishDecide(){
+async function finishDecide(){
+  // Execute all Todoist operations now
+  var ops=[];
+  allItems.forEach(function(t){
+    var d=decisions[t.id];
+    if(!d)return;
+    if(d.action==='dump'){} // already deleted
+    else if(d.action==='do'){
+      var r=refineDecisions[t.id];
+      if(r&&r.action==='schedule'&&r.date)ops.push(setDue(t.id,r.date));
+      else if(!r||r.action==='now')ops.push(setDue(t.id,iso()));
+    }
+    else if(d.action==='file'&&d.projectId){ops.push(tPost('/tasks/'+t.id+'/move',{parent_id:null,section_id:null,project_id:d.projectId}));}
+    else if(d.action==='deliberate'&&d.date){
+      ops.push(setDue(t.id,d.date));
+      var task=taskRegistry[t.id];
+      var labels=task?(task.labels||[]).filter(function(l){return l!=='thisweek'&&l!=='waiting';}).concat(['deliberate']):['deliberate'];
+      ops.push(setLabels(t.id,labels));
+      if(d.projectId)ops.push(tPost('/tasks/'+t.id+'/move',{parent_id:null,section_id:null,project_id:d.projectId}));
+    }
+  });
+  try{await Promise.allSettled(ops);}catch(e){}
   var doItems=allItems.filter(function(t){return decisions[t.id]&&decisions[t.id].action==='do';});
   finalItems=doItems.filter(function(t){var r=refineDecisions[t.id];if(!r)return true;return r.action==='now'||r.action==='schedule';});
   next();
@@ -463,11 +521,14 @@ async function handleClick(el){
   var action=el.getAttribute('data-action'),id=el.getAttribute('data-id');
   if(action==='removebrain'){removeBL(parseInt(el.getAttribute('data-idx')));return;}
   if(action==='undecide'){delete decisions[id];decidePhase='deciding';showDecide();return;}
-  if(action==='decide-do'){decisions[id]={action:'do'};try{await setDue(id,iso());}catch(e){}showDecide();return;}
+  if(action==='decide-do'){decisions[id]={action:'do'};showDecide();return;}
+  if(action==='decide-file'){decisions[id]={action:'file'};showDecide();return;}
+  if(action==='decide-deliberate'){decisions[id]={action:'deliberate'};showDecide();return;}
   if(action==='decide-dump'){decisions[id]={action:'dump'};try{await delTask(id);}catch(e){}showDecide();return;}
   if(action==='open-file'){var fp=document.getElementById('fp-'+id),dp=document.getElementById('dp-'+id);if(dp)dp.classList.remove('open');if(fp)fp.classList.toggle('open');return;}
   if(action==='open-delib'){var dp2=document.getElementById('dp-'+id),fp2=document.getElementById('fp-'+id);if(fp2)fp2.classList.remove('open');if(dp2)dp2.classList.toggle('open');return;}
-  if(action==='file-proj'){var pid=el.getAttribute('data-proj');decisions[id]={action:'file',projectId:pid};try{await moveTask(id,pid);}catch(e){}var fp3=document.getElementById('fp-'+id);if(fp3)fp3.classList.remove('open');showDecide();return;}
+  if(action==='file-proj'){var pid=el.getAttribute('data-proj');decisions[id]={action:'file',projectId:pid};var fp3=document.getElementById('fp-'+id);if(fp3)fp3.classList.remove('open');// mark filed items visually
+  var el2=document.getElementById('dr-'+id);if(el2){el2.style.opacity='.5';el2.style.pointerEvents='none';var proj2=PROJECTS.find(function(p){return p.id===pid;});var meta=el2.querySelector('.task-meta');if(meta&&proj2)meta.innerHTML+=(' &middot; '+proj2.name);}return;}
   if(action==='delib-date'){
     var when=el.getAttribute('data-when');
     if(!deliberateSel[id])deliberateSel[id]={};
