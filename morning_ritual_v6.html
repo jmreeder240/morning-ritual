@@ -163,22 +163,21 @@ async function tPost(p,data){var r=await fetch(PROXY+p,{method:'POST',headers:{'
 async function tDel(p){await fetch(PROXY+p,{method:'DELETE'});}
 async function getInbox(){return tGet('/tasks?project_id='+PR.inbox);}
 async function getOverdue(){
-  try{var t=await tFilterPost('overdue');
+  try{var t=await tGet('/tasks?filter='+encodeURIComponent('overdue'));
   return t.filter(function(x){
     if(x.due&&x.due.is_recurring)return false;
     var c=x.content.toLowerCase();
     return !c.includes('intention')&&!c.includes('review 90')&&!c.includes('90-day goal')&&!c.includes('sunday review')&&!c.includes('standing agenda')&&x.project_id!==PR.daily&&!deletedIds.has(x.id);
   });}catch(e){return[];}}
-async function tFilterPost(query){
-  var r=await fetch(PROXY+'/tasks/filter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query})});
-  if(!r.ok){var err=await r.text();console.error('tFilter error',r.status,err);throw new Error(r.status);}
-  var d=await r.json();return Array.isArray(d)?d:(d.results||d);
+async function tFilter(query){
+  try{var r=await tGet('/tasks?filter='+encodeURIComponent(query));return r;}
+  catch(e){console.error('tFilter failed for query:',query,e);return[];}
 }
-async function getDeliberateDue(){try{var t=await tGet('/tasks?label=deliberate');var today=iso();return t.filter(function(x){return x.due&&x.due.date<=today;});}catch(e){console.error('getDeliberateDue',e);return[];}}
-async function getThisweekUnscheduled(){try{var t=await tGet('/tasks?label=thisweek');var today=iso();return t.filter(function(x){return !x.due||x.due.date===today;});}catch(e){console.error('getThisweek',e);return[];}}
-async function getWaiting(){try{return await tGet('/tasks?label=waiting');}catch(e){console.error('getWaiting',e);return[];}}
-async function getRecurring(){try{var t=await tFilterPost('today | overdue');return t.filter(function(x){return x.due&&x.due.is_recurring&&!deletedIds.has(x.id);});}catch(e){console.error('getRecurring',e);return[];}}
-async function getToday(){try{var t=await tFilterPost('today');return sortP(t.filter(function(x){var c=x.content.toLowerCase();return !c.includes('intention')&&!c.includes('review 90')&&x.project_id!==PR.daily&&!deletedIds.has(x.id);}));}catch(e){console.error('getToday',e);return[];}}
+async function getDeliberateDue(){try{var t=await tGet('/tasks?label=deliberate');var today=iso();return t.filter(function(x){return x.due&&x.due.date<=today;});}catch(e){return[];}}
+async function getThisweekUnscheduled(){try{var t=await tGet('/tasks?label=thisweek');var today=iso();return t.filter(function(x){return !x.due||x.due.date===today;});}catch(e){return[];}}
+async function getWaiting(){try{return await tGet('/tasks?label=waiting');}catch(e){return[];}}
+async function getRecurring(){try{var t=await tGet('/tasks?filter='+encodeURIComponent('today | overdue'));return t.filter(function(x){return x.due&&x.due.is_recurring&&!deletedIds.has(x.id);});}catch(e){return[];}}
+async function getToday(){try{var t=await tGet('/tasks?filter='+encodeURIComponent('today'));return sortP(t.filter(function(x){var c=x.content.toLowerCase();return !c.includes('intention')&&!c.includes('review 90')&&x.project_id!==PR.daily&&!deletedIds.has(x.id);}));}catch(e){return[];}}
 async function delTask(id){deletedIds.add(id);return tDel('/tasks/'+id);}
 async function setDue(id,date){return tPost('/tasks/'+id,{due_date:date});}
 async function setLabels(id,labels){return tPost('/tasks/'+id,{labels:labels});}
