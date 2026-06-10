@@ -1,6 +1,5 @@
 const https = require('https');
 const http = require('http');
-const url = require('url');
 
 const PORT = process.env.PORT || 8080;
 const TOKEN = process.env.TODOIST_TOKEN;
@@ -30,16 +29,17 @@ const server = http.createServer((req, res) => {
       }
     };
 
-    console.log('Proxying:', req.method, options.path);
-
     var body = '';
     req.on('data', function(chunk) { body += chunk; });
     req.on('end', function() {
+      console.log('Proxying:', req.method, options.path);
+      if (body) console.log('Request body:', body.substring(0, 200));
+
       var proxyReq = https.request(options, function(proxyRes) {
         var data = '';
         proxyRes.on('data', function(chunk) { data += chunk; });
         proxyRes.on('end', function() {
-          console.log('Status:', proxyRes.statusCode, '| Length:', data.length);
+          console.log('Status:', proxyRes.statusCode, '| Response:', data.substring(0, 300));
           res.setHeader('Access-Control-Allow-Origin', '*');
           if (proxyRes.statusCode === 204) { res.writeHead(204); res.end(); return; }
           try {
@@ -47,7 +47,6 @@ const server = http.createServer((req, res) => {
             res.writeHead(proxyRes.statusCode, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(json));
           } catch(e) {
-            console.log('Parse error, raw:', data.substring(0, 200));
             res.writeHead(500, {'Content-Type': 'application/json'});
             res.end(JSON.stringify({error: 'Parse error', raw: data.substring(0, 300)}));
           }
@@ -55,7 +54,6 @@ const server = http.createServer((req, res) => {
       });
 
       proxyReq.on('error', function(e) {
-        console.error('Proxy error:', e.message);
         res.writeHead(500, {'Content-Type': 'application/json'});
         res.end(JSON.stringify({error: e.message}));
       });
